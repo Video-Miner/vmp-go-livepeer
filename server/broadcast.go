@@ -835,7 +835,6 @@ func selectOrchestrator(ctx context.Context, n *core.LivepeerNode, params *core.
 			Balance:           balance,
 			lock:              &sync.RWMutex{},
 			OrchestratorScore: oScore,
-			InitialPrice:      od.RemoteInfo.PriceInfo,
 		}
 
 		sessions = append(sessions, session)

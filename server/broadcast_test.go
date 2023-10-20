@@ -295,7 +295,9 @@ func TestStopSessionErrors(t *testing.T) {
 }
 
 func TestNewSessionManager(t *testing.T) {
-	n, _ := core.NewLivepeerNode(nil, "", nil)
+	defaultConfig := core.DefaultLivepeerConfig()
+	testconfig := &defaultConfig
+	n, _ := core.NewLivepeerNode(nil, "", nil, testconfig)
 	assert := assert.New(t)
 
 	mid := core.RandomManifestID()

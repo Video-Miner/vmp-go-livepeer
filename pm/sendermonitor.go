@@ -42,6 +42,8 @@ type SenderMonitor interface {
 
 	// ValidateSender checks whether a sender's unlock period ends the round after the next round
 	ValidateSender(addr ethcommon.Address) error
+
+	GetTicketChannel() chan map[string]interface{}
 }
 
 type remoteSender struct {
@@ -91,21 +93,29 @@ type LocalSenderMonitor struct {
 
 	ticketStore TicketStore
 
+	ticketChannel chan map[string]interface{}
+
 	quit chan struct{}
 }
 
 // NewSenderMonitor returns a new SenderMonitor
 func NewSenderMonitor(cfg *LocalSenderMonitorConfig, broker Broker, smgr SenderManager, tm TimeManager, store TicketStore) *LocalSenderMonitor {
 	return &LocalSenderMonitor{
-		cfg:         cfg,
-		broker:      broker,
-		smgr:        smgr,
-		tm:          tm,
-		senders:     make(map[ethcommon.Address]*remoteSender),
-		redeemable:  make(chan *redemption),
-		ticketStore: store,
-		quit:        make(chan struct{}),
+		cfg:           cfg,
+		broker:        broker,
+		smgr:          smgr,
+		tm:            tm,
+		senders:       make(map[ethcommon.Address]*remoteSender),
+		redeemable:    make(chan *redemption),
+		ticketStore:   store,
+		quit:          make(chan struct{}),
+		ticketChannel: make(chan map[string]interface{}),
 	}
+}
+
+// Stop signals the monitor to exit gracefully
+func (sm *LocalSenderMonitor) GetTicketChannel() chan map[string]interface{} {
+	return sm.ticketChannel
 }
 
 // Start initiates the helper goroutines for the monitor

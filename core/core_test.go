@@ -20,6 +20,14 @@ import (
 	"github.com/livepeer/lpms/stream"
 )
 
+var DefaultTestConfig LivepeerConfig
+var TestConfig *LivepeerConfig
+
+func init() {
+	DefaultTestConfig = DefaultLivepeerConfig()
+	TestConfig = &DefaultTestConfig
+}
+
 func Over1Pct(val int, cmp int) bool {
 	return float32(val) > float32(cmp)*1.02 || float32(val) < float32(cmp)*0.98
 }
@@ -49,7 +57,7 @@ func TestTranscode(t *testing.T) {
 	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	seth := &eth.StubClient{}
 	tmp := t.TempDir()
-	n, _ := NewLivepeerNode(seth, tmp, nil)
+	n, _ := NewLivepeerNode(seth, tmp, nil, TestConfig)
 	ffmpeg.InitFFmpeg()
 
 	ss := StubSegment()
@@ -62,7 +70,7 @@ func TestTranscode(t *testing.T) {
 	}
 
 	// Sanity check full flow.
-	n.Transcoder = NewLocalTranscoder(tmp)
+	n.Transcoders["base"] = NewLocalTranscoder(tmp)
 	tr, err = n.sendToTranscodeLoop(context.TODO(), md, ss)
 	if err != nil {
 		t.Error("Error transcoding ", err)
@@ -90,10 +98,12 @@ func TestTranscode(t *testing.T) {
 
 func TestTranscodeSeg(t *testing.T) {
 	tmp := t.TempDir()
+	defaultConfig := DefaultLivepeerConfig()
+	cfg := &defaultConfig
 
 	profiles := []ffmpeg.VideoProfile{ffmpeg.P720p60fps16x9, ffmpeg.P144p30fps16x9}
-	n, _ := NewLivepeerNode(nil, tmp, nil)
-	n.Transcoder = stubTranscoderWithProfiles(profiles)
+	n, _ := NewLivepeerNode(nil, tmp, nil, cfg)
+	n.Transcoders["base"] = stubTranscoderWithProfiles(profiles)
 
 	conf := transcodeConfig{LocalOS: (drivers.NewMemoryDriver(nil)).NewSession("")}
 	md := &SegTranscodingMetadata{Profiles: profiles, AuthToken: stubAuthToken()}
@@ -108,7 +118,7 @@ func TestTranscodeSeg(t *testing.T) {
 	assert.Nil(res.Err)
 	assert.Nil(res.Sig)
 	// sanity check results
-	resBytes, _ := n.Transcoder.Transcode(context.TODO(), md)
+	resBytes, _ := n.Transcoders["base"].Transcode(context.TODO(), md)
 	for i, trData := range res.TranscodeData.Segments {
 		assert.Equal(resBytes.Segments[i].Data, trData.Data)
 	}
@@ -132,11 +142,11 @@ func TestTranscodeLoop_GivenNoSegmentsPastTimeout_CleansSegmentChan(t *testing.T
 	drivers.NodeStorage = drivers.NewMemoryDriver(nil)
 	seth := &eth.StubClient{}
 	tmp := t.TempDir()
-	n, _ := NewLivepeerNode(seth, tmp, nil)
+	n, _ := NewLivepeerNode(seth, tmp, nil, TestConfig)
 	ffmpeg.InitFFmpeg()
 	ss := StubSegment()
 	md := &SegTranscodingMetadata{Profiles: videoProfiles, AuthToken: stubAuthToken()}
-	n.Transcoder = NewLocalTranscoder(tmp)
+	n.Transcoders["base"] = NewLocalTranscoder(tmp)
 
 	transcodeLoopTimeout = 100 * time.Millisecond
 	assert := assert.New(t)
@@ -167,8 +177,8 @@ func TestTranscodeLoop_CleanupForBroadcasterEndTranscodingSession(t *testing.T) 
 	tmp := t.TempDir()
 
 	ffmpeg.InitFFmpeg()
-	n, _ := NewLivepeerNode(&eth.StubClient{}, tmp, nil)
-	n.Transcoder = NewLocalTranscoder(tmp)
+	n, _ := NewLivepeerNode(&eth.StubClient{}, tmp, nil, TestConfig)
+	n.Transcoders["base"] = NewLocalTranscoder(tmp)
 
 	md := &SegTranscodingMetadata{Profiles: videoProfiles, AuthToken: stubAuthToken()}
 	mid := ManifestID(md.AuthToken.SessionId)
@@ -180,7 +190,7 @@ func TestTranscodeLoop_CleanupForBroadcasterEndTranscodingSession(t *testing.T) 
 
 	startRoutines := runtime.NumGoroutine()
 
-	n.endTranscodingSession(md.AuthToken.SessionId, context.TODO())
+	n.endTranscodingSession(md.AuthToken.SessionId, string(md.ManifestID), context.TODO())
 	waitForTranscoderLoopTimeout(n, mid)
 
 	endRoutines := runtime.NumGoroutine()

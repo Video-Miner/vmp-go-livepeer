@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="en-us" Codepage="1252" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+   <String Id="Language" Value="1033" />         <!-- Supported language and codepage codes can be found here: http://www.tramontana.co.hu/wix/lesson2.php#2.4 -->
+   
+   <String Id="ApplicationName" Value="Video Miner Pool" />
+   <String Id="ManufacturerName" Value="Video Miner" />
+   <String Id="ManufacturerFullName" Value="Video Miner" />
+   <String Id="ProductDescription" Value="Video Miner Livepeer Transcoder Pool" />
+   <String Id="Comments" Value="Installs Video Miner" />
+
+   <String Id="LicenseRtf" Overridable="yes" Value="Eula-en.rtf" />
+
+   <String Id="ShowVideoCardProgress" Value="Configuring video card...."/>
+   <String Id="OS2Old" Value="This product requires at least Windows Vista / Server 2008." />
+   <String Id="NewerInstalled" Value="The same or a newer version of this product is already installed." />
+   <String Id="x64VersionRequired" Value="You need to install the 64-bit version of this product on 64-bit Windows." />
+   <String Id="x86VersionRequired" Value="You need to install the 32-bit version of this product on 32-bit Windows." />
+
+   <String Id="FeatureCompleteDescription" Value="The complete package." />
+   <String Id="FeatureMainProgramDescription" Value="The main version including all dependencies." />
+   <String Id="FeatureMainProgramTitle" Value="Main program" />
+
+   <String Id="ServiceDisplayName" Value="Video Miner Pool Transcoder" />
+   <String Id="ServiceDescription" Value="Runs and connects a Livepeer Transcoder to the Video Miner network." />
+
+   <String Id="EthAddrDlgTitle" Value="{\WixUI_Font_Title}Transcoder Configuration" />
+   <String Id="EthAddrDlgDescription" Value="Please enter your Ethereum address and authentication token." />
+   <String Id="EthAddrDlgEthAddrLabel" Value="Specify to which Ethereum address to use (begins with 0x)" />
+   <String Id="EthAddrDlgAuthTokenLabel" Value="Enter your authentication token" />
+   <String Id="EthAddrDlgGPUIDLabel" Value="Enter each GPU ID seperated by a comma or the word all." />
+   <String Id="EthAddrDlgGPUDetailsBtnLabel" Value="GPU Help" />
+   <String Id="EthAddrDlgMaxSessionsLabel" Value="Enter the maximum number of sessions your system can transcode." />
+
+    
+    <String Id="GPUDetailsDlgTitle" Value="{\WixUI_Font_Title}GPU Details" />
+    <String Id="GPUDetailsDlgDescription" Value="The GPUs discovered on this device are listed below." />
+    <String Id="GPUDetailsDlgGPUDetails" Value="[GPU_DETAILS]" />
+    <String Id="GPUDetailsDlgGPUIds" Value="Your systems GPU Ids: &quot;[KNOWN_GPU_IDS]&quot;." />
+
+    <String Id="ValidationErrorInstructions" Value="{\WixUI_Error_Msg}Please correct the following errors:" />
+   <String Id="InvalidTranscoderInputs" Value="The Ethereum address you supplied in not a valid address." />
+   <String Id="InvalidGPUInputs" Value="You have entered invalid values for the GPU Ids." />
+   <String Id="InvalidMaxSessions" Value="You have entered an invalid value for max sessions." />
+   <String Id="InvalidAuthToken" Value="You have entered an invalid value for the auth token." />
+   
+
+   <String Id="ExitDialogTitle" Value="{\WixUI_Font_Bigger}Completed the Setup Wizard" />
+   <String Id="ExitDlgInstructions" Value="Check the box below to view logs for the !(loc.ApplicationName) process, which will open after pressing &quot;Finish&quot;.&#13;&#10;&#13;&#10;If you see the log message &quot;required capability H.264 is not supported...&quot;, apply the patch manually using the provided patch program.&#13;&#10;&#13;&#10;You can access the patch program from your computer at &quot;[INSTALLDIR]\patch&quot;" />
+   <String Id="ExitDlgPatchingShowApp" Value="Patching App" />
+   <String Id="ExitDlgPatchingShowLogs" Value="Show Logs" />
+   <String Id="ExitDlgPatchingVideoLink" Value="Walkthrough Video (open browser)" />
+   <String Id="ExitDlgShowLogsChkBx" Value="Show Logs After Setup Wizard" />
+   <String Id="ExitDialogDescription" Value="The installation has completed successfully."/>
+   <String Id="UninstallExitDialogDescription" Value="The installation has been removed successfully."/>
+    
+
+</WixLocalization>

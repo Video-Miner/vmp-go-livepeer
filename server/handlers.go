@@ -1512,3 +1512,28 @@ func mustHaveDb(db interface{}, h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
+
+// Plutus
+func (s *LivepeerServer) stopTranscoderHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		tId := r.FormValue("tid")
+		//
+		go func() {
+			defer close(s.LivepeerNode.TStopChans[tId])
+			s.LivepeerNode.TStopChans[tId] <- "Stop"
+		}()
+	})
+}
+
+func (s *LivepeerServer) connectedTranscoders() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		transcoders := s.LivepeerNode.TranscoderManager.RegisteredTranscodersInfo()
+		res, err := json.Marshal(transcoders)
+		if err != nil {
+			respond500(w, err.Error())
+			return
+		}
+		respondJsonOk(w, res)
+	})
+
+}
