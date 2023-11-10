@@ -71,11 +71,11 @@ func TestTranscodeAndBroadcast(t *testing.T) {
 	storage := drivers.NewMemoryDriver(nil).NewSession("")
 	config := transcodeConfig{LocalOS: storage, OS: storage}
 
-	n, err := NewLivepeerNode(nil, t.TempDir(), nil)
+	n, err := NewLivepeerNode(nil, t.TempDir(), nil, TestConfig)
 	if err != nil {
 		t.Errorf("Error: %v", err)
 	}
-	n.Transcoder = tr
+	n.Transcoders["base"] = tr
 
 	md := &SegTranscodingMetadata{Profiles: p, AuthToken: stubAuthToken()}
 	ss := StubSegment()
@@ -128,7 +128,7 @@ func TestServiceURIChange(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	n, err := NewLivepeerNode(nil, "", nil)
+	n, err := NewLivepeerNode(nil, "", nil, TestConfig)
 	require.Nil(err)
 
 	sUrl, err := url.Parse("test://testurl.com")
@@ -162,7 +162,7 @@ func TestSetAndGetBasePrice(t *testing.T) {
 	require := require.New(t)
 	assert := assert.New(t)
 
-	n, err := NewLivepeerNode(nil, "", nil)
+	n, err := NewLivepeerNode(nil, "", nil, TestConfig)
 	require.Nil(err)
 
 	price := big.NewRat(1, 1)

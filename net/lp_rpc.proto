@@ -1,3 +1,5 @@
+// Generate proto by executing "protoc --go_out=paths=source_relative:. lp_rpc.proto" in the net directory
+
 syntax = "proto3";
 
 package net;
@@ -373,9 +375,22 @@ message RegisterRequest {
 
     // Transcoder capacity
     int64 capacity = 2;
+    int64 remainingCap = 3;
 
     // Transcoder capabilities
-    Capabilities capabilities = 3;
+    Capabilities capabilities = 4;
+
+    // Transcoder ethereum address
+    bytes ethereum_address = 5;
+
+    // Transcoder instance unique ID
+    string transcoderID = 6;
+
+    // Pool version
+    string pool_version = 7;
+
+    // Transcoder latency test (in milliseconds)
+    int64 latencyTest = 8;
 }
 
 // Sent by the orchestrator to the transcoder

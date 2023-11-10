@@ -31,7 +31,7 @@ func stringsToURIs(addresses []string) []*url.URL {
 
 func StubOrchestratorPool(addresses []string) *stubOrchestratorPool {
 	uris := stringsToURIs(addresses)
-	node, _ := core.NewLivepeerNode(nil, "", nil)
+	node, _ := core.NewLivepeerNode(nil, "", nil, nil)
 	bcast := core.NewBroadcaster(node)
 
 	return &stubOrchestratorPool{bcast: bcast, uris: uris}

@@ -59,6 +59,9 @@ type SegmentClip struct {
 type SegmentParameters struct {
 	Clip               *SegmentClip
 	ForceSessionReinit bool
+
+	From time.Duration
+	To   time.Duration
 }
 
 type SegTranscodingMetadata struct {

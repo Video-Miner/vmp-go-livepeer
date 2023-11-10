@@ -364,6 +364,8 @@ func createRTMPStreamIDHandler(_ctx context.Context, s *LivepeerServer, webhookR
 		// Ensure there's no concurrent StreamID with the same name
 		s.connectionLock.RLock()
 		defer s.connectionLock.RUnlock()
+
+		//VMP: used to be s.LivepeeNode.MaxSession. Need to reconcile
 		if core.MaxSessions > 0 && len(s.rtmpConnections) >= core.MaxSessions {
 			clog.Errorf(ctx, "Too many connections for streamID url=%s err=%q", url.String(), err)
 			return nil

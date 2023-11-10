@@ -104,21 +104,21 @@ func (b *TicketBatch) Tickets() []*Ticket {
 // calculated using the ticket's face value and winning probability
 type Ticket struct {
 	// Recipient is the ETH address of recipient
-	Recipient ethcommon.Address
+	Recipient ethcommon.Address `json:"recipient"`
 
 	// Sender is the ETH address of sender
-	Sender ethcommon.Address
+	Sender ethcommon.Address `json:"sender"`
 
 	// FaceValue represents the pay out to
 	// the recipient if the ticket wins
-	FaceValue *big.Int
+	FaceValue *big.Int `json:"facevalue"`
 
 	// WinProb represents how likely a ticket will win
-	WinProb *big.Int
+	WinProb *big.Int `json:"winprob"`
 
 	// SenderNonce is the monotonically increasing counter that makes
 	// each ticket unique given a particular recipientRand value
-	SenderNonce uint32
+	SenderNonce uint32 `json:"sendernonce"`
 
 	// RecipientRandHash is the 32 byte keccak-256 hash commitment to a random number
 	// provided by the recipient. In order for the recipient to redeem
@@ -126,7 +126,7 @@ type Ticket struct {
 	RecipientRandHash ethcommon.Hash
 
 	// CreationRound is the round during which the ticket is created
-	CreationRound int64
+	CreationRound int64 `json:"round"`
 
 	// CreationRoundBlockHash is the block hash associated with CreationRound
 	CreationRoundBlockHash ethcommon.Hash

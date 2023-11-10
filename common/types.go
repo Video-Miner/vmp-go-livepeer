@@ -3,17 +3,20 @@ package common
 import (
 	"context"
 	"encoding/json"
-	ethcommon "github.com/ethereum/go-ethereum/common"
-	"github.com/livepeer/go-livepeer/net"
-	"github.com/livepeer/m3u8"
 	"math/big"
 	"net/url"
 	"sync"
+
+	ethcommon "github.com/ethereum/go-ethereum/common"
+	"github.com/livepeer/go-livepeer/net"
+	"github.com/livepeer/m3u8"
 )
 
 type RemoteTranscoderInfo struct {
-	Address  string
-	Capacity int
+	Address         string
+	Capacity        int
+	Load            int
+	EthereumAddress ethcommon.Address
 }
 
 type StreamInfo struct {

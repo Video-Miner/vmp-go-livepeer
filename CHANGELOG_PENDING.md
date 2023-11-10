@@ -10,8 +10,6 @@
 
 #### Broadcaster
 
-- \#xxx Use FPS of 60, rather then 120 for cost estimation (@thomshutt)
-
 #### Orchestrator
 
 #### Transcoder

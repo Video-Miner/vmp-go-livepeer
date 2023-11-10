@@ -18,6 +18,8 @@ import (
 )
 
 func TestSetupOrchestrator(t *testing.T) {
+	defaultConfig := core.DefaultLivepeerConfig()
+	cfg := &defaultConfig
 	require := require.New(t)
 	assert := assert.New(t)
 
@@ -38,7 +40,7 @@ func TestSetupOrchestrator(t *testing.T) {
 		TranscoderAddress: orch,
 	}
 
-	n, err := core.NewLivepeerNode(stubEthClient, "", dbh)
+	n, err := core.NewLivepeerNode(stubEthClient, "", nil, cfg)
 	require.Nil(err)
 
 	err = setupOrchestrator(n, orch)

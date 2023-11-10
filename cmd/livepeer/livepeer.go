@@ -67,7 +67,7 @@ func main() {
 	cfg = updateNilsForUnsetFlags(cfg)
 
 	// compare current settings with default values, and print the difference
-	defCfg := starter.DefaultLivepeerConfig()
+	defCfg := core.DefaultLivepeerConfig()
 	vDefCfg := reflect.ValueOf(defCfg)
 	vCfg := reflect.ValueOf(cfg)
 	cfgType := vCfg.Type()
@@ -109,8 +109,8 @@ func main() {
 	}
 }
 
-func parseLivepeerConfig() starter.LivepeerConfig {
-	cfg := starter.DefaultLivepeerConfig()
+func parseLivepeerConfig() core.LivepeerConfig {
+	cfg := core.DefaultLivepeerConfig()
 
 	// Network & Addresses:
 	cfg.Network = flag.String("network", *cfg.Network, "Network to connect to")
@@ -205,12 +205,21 @@ func parseLivepeerConfig() starter.LivepeerConfig {
 	cfg.AuthWebhookURL = flag.String("authWebhookUrl", *cfg.AuthWebhookURL, "RTMP authentication webhook URL")
 	cfg.DetectionWebhookURL = flag.String("detectionWebhookUrl", *cfg.DetectionWebhookURL, "(Experimental) Detection results callback URL")
 
+	cfg.AuthUri = flag.String("authUri", *cfg.AuthUri, "Auth system uri. If not set, skips authentication check in the Orchestrator")
+	cfg.DiscoveryUri = flag.String("discoveryUri", *cfg.DiscoveryUri, "Orchestrator discovery uri. Should return a JSON array of uri strings")
+
+	cfg.UUID = flag.String("uuid", *cfg.UUID, "Orchestrator identifier provided by Plutus team.")
+	cfg.LatencyThreshold = flag.Int64("latencyThreshold", *cfg.LatencyThreshold, "Latency threshold (in milliseconds) for T to connect to O.")
+
+	cfg.MqttBrokerHost = flag.String("mqttBrokerHost", *cfg.MqttBrokerHost, "hostname for mqtt broker")
+	cfg.MqttBrokerPort = flag.Int("mqttBrokerPort", *cfg.MqttBrokerPort, "port for mqtt broker")
+
 	return cfg
 }
 
 // updateNilsForUnsetFlags changes some cfg fields to nil if they were not explicitly set with flags.
 // For some flags, the behavior is different whether the value is default or not set by the user at all.
-func updateNilsForUnsetFlags(cfg starter.LivepeerConfig) starter.LivepeerConfig {
+func updateNilsForUnsetFlags(cfg core.LivepeerConfig) core.LivepeerConfig {
 	res := cfg
 
 	isFlagSet := make(map[string]bool)

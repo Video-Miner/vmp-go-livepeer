@@ -39,6 +39,12 @@ type LoadBalancingTranscoder struct {
 	idx      int // Ensures a non-tapered work distribution
 }
 
+func (lb *LoadBalancingTranscoder) Stop() {
+	for _, v := range lb.sessions {
+		close(v.stop)
+	}
+}
+
 func (lb *LoadBalancingTranscoder) EndTranscodingSession(sessionId string) {
 	lb.mu.RLock()
 	defer lb.mu.RUnlock()
@@ -72,6 +78,8 @@ func (lb *LoadBalancingTranscoder) Transcode(ctx context.Context, md *SegTransco
 	lb.mu.RUnlock()
 	if exists {
 		clog.V(common.DEBUG).Infof(ctx, "LB: Using existing transcode session for key=%s", session.key)
+
+		//VMP: figure out if this is breaking. Likely need to use the performance system to select another transcoder
 		if md != nil && md.SegmentParameters != nil && md.SegmentParameters.ForceSessionReinit {
 			// Broadcaster requested HW session reinitialization
 			lb.mu.Lock()
