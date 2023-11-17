@@ -11,7 +11,7 @@ set -o nounset
 
 DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-currentTag="$(git describe --tags)"
+currentTag="$(git describe --tags --always)"
 currentVersion="$(cat "$DIR/VERSION")"
 currentSha="$(git describe --always --long --dirty --abbrev=8)"
 
