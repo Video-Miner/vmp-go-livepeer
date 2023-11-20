@@ -87,6 +87,7 @@ jobs:
 
       - name: Build binaries
         run: |
+          export PKG_CONFIG_PATH=~/compiled/lib/pkgconfig
           git config --global --add safe.directory '*'
           ./ci_env.sh make
 
