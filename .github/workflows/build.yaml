@@ -62,14 +62,6 @@ jobs:
           echo "GO_BUILD_DIR=lp-builds/" >> $GITHUB_ENV
           echo "PKG_CONFIG_PATH=/github/home/compiled/lib/pkgconfig" >> $GITHUB_ENV
 
-      - name: Set GPU build environment
-        if: matrix.hardware.type == 'gpu'
-        run: |
-          echo "CPATH=/usr/local/cuda_${{ matrix.arch }}/include" >> $GITHUB_ENV
-          echo "LIBRARY_PATH=/usr/local/cuda_${{ matrix.arch }}/lib64" >> $GITHUB_ENV
-          echo "CGO_LDFLAGS=-L/usr/local/cuda_${{ matrix.arch }}/lib64" >> $GITHUB_ENV
-          echo "RELEASE_TAG=gpu" >> $GITHUB_ENV
-
       - name: Install dependencies
         run: |
           sudo apt update \
