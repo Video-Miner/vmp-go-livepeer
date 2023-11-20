@@ -1055,16 +1055,15 @@ func (rtm *RemoteTranscoderManager) Manage(node *LivepeerNode, stream net.Transc
 	if monitor.Enabled {
 		totalLoad, totalCapacity, _, liveTranscodersNum = rtm.totalLoadAndCapacity()
 	}
+	node.MqttBroker.PublishTranscoderConnection(transcoder, false, "orchestrator.go:1066")
+	node.MqttBroker.SubTranscoderTelemetry(transcoder.Uid)
 	rtm.RTmutex.Unlock()
+
 	if monitor.Enabled {
 		monitor.SetTranscodersNumberAndLoad(totalLoad, totalCapacity, liveTranscodersNum)
 		monitor.SetTranscoderCapacity(thisAddr, thisCapacity)
 		monitor.SetTranscoderLocalLoad(thisAddr, 0)
 	}
-
-	glog.Info(thisAddr)
-	node.MqttBroker.PublishTranscoderConnection(transcoder, false)
-	node.MqttBroker.SubTranscoderTelemetry(transcoder.Uid)
 
 	<-transcoder.eof
 	glog.Infof("Got transcoder=%s eof, removing from live transcoders map", from)
@@ -1090,7 +1089,7 @@ func (rtm *RemoteTranscoderManager) Manage(node *LivepeerNode, stream net.Transc
 	// 	glog.Error("Error writing transcoder connection log=", err)
 	// }
 
-	node.MqttBroker.PublishTranscoderConnection(transcoder, true)
+	node.MqttBroker.PublishTranscoderConnection(transcoder, true, "orchestrator.go:1093")
 
 	rtm.RTmutex.Unlock()
 	if monitor.Enabled {
@@ -1509,7 +1508,7 @@ func (rtm *RemoteTranscoderManager) selectTranscoder(md *SegTranscodingMetadata)
 				sessionIdlist += (string(mid) + ",")
 			}
 
-			rtm.MqttBroker.PublishTranscoderConnection(currentTranscoder, false)
+			rtm.MqttBroker.PublishTranscoderConnection(currentTranscoder, false, "orchestrator.go:1512")
 		}
 		return currentTranscoder, nil
 	}
@@ -1549,7 +1548,7 @@ func (rtm *RemoteTranscoderManager) completeStreamSession(sessionId string, mani
 		sessionIdlist += (string(mid) + ",")
 	}
 
-	rtm.MqttBroker.PublishTranscoderConnection(t, false)
+	rtm.MqttBroker.PublishTranscoderConnection(t, false, "orchestrator.go:1552")
 	delete(rtm.streamSessions, sessionId)
 }
 

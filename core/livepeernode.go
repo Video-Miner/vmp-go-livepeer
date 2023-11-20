@@ -395,9 +395,9 @@ type LivepeerNode struct {
 	TStopChans       map[string]chan string
 	LivepeerConfig   *LivepeerConfig
 	MqttBroker       *PlutusMQ
-	amMu             sync.RWMutex
+	amMu             *sync.RWMutex
 	ActiveManifests  []*ActiveManifest
-	poMu             sync.RWMutex
+	poMu             *sync.RWMutex
 	PlutusOrchs      map[string]*PlutusOrchestrator
 	TranscoderCaps   []Capability
 	MaxSessions      int
@@ -432,6 +432,9 @@ func NewLivepeerNode(e eth.LivepeerEthClient, wd string, dbh *common.DB, cfg *Li
 		TStopChans:       make(map[string]chan string),
 		Transcoders:      make(map[string]Transcoder),
 		PlutusOrchs:      make(map[string]*PlutusOrchestrator),
+		poMu:             &sync.RWMutex{},
+		ActiveManifests:  []*ActiveManifest{},
+		amMu:             &sync.RWMutex{},
 		MaxSessions:      maxSession,
 		TicketChan:       make(chan map[string]interface{}),
 		NodeInitialized:  false,
@@ -468,7 +471,13 @@ func (n *LivepeerNode) GetBasePrice(b_eth_addr string) *big.Rat {
 	n.mu.RLock()
 	defer n.mu.RUnlock()
 
-	return n.priceInfo[addr]
+	price, exists := n.priceInfo[addr]
+
+	if !exists {
+		price = n.priceInfo["default"]
+	}
+
+	return price
 }
 
 func (n *LivepeerNode) GetBasePrices() map[string]*big.Rat {

@@ -113,11 +113,11 @@ func (n *LivepeerNode) ActiveManifestAddUpdate(manifestId ManifestID) {
 	n.ActiveManifests = append(n.ActiveManifests, &am)
 	glog.Infof(`Active manifest added: %s`, manifestId)
 	n.amMu.Unlock()
-	n.MqttBroker.PublishTranscoderLoadCapacity()
+	n.MqttBroker.PublishTranscoderLoadCapacity("videominer.go:116")
 
 }
 
-// called by transcoder node, not the orchestrator node
+// called by transcoder node, not the orchestrator node. caller is not required to hold mutex as it is held by this function.
 func (n *LivepeerNode) GetTranscoderLoadAndCapacity() (int, int) {
 	n.amMu.RLock()
 	defer n.amMu.RUnlock()
@@ -150,7 +150,7 @@ func (n *LivepeerNode) ActiveManifestCleanup() {
 	n.amMu.Unlock()
 
 	if modified {
-		n.MqttBroker.PublishTranscoderLoadCapacity()
+		n.MqttBroker.PublishTranscoderLoadCapacity("videominer.go:153")
 	}
 }
 
