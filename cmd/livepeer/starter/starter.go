@@ -1004,7 +1004,11 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 			tc <- struct{}{}
 		} else {
 			n.MqttBroker.ConnectToBoker()
-			n.MqttBroker.PublishOrchestratorOnline()
+
+			//***calling this in OnConnect handler in plutusmq.go***
+			// n.TranscoderManager.RTmutex.Lock()
+			// n.MqttBroker.PublishOrchestratorOnline("starter.go:1009")
+			// n.TranscoderManager.RTmutex.Unlock()
 		}
 
 	}()
@@ -1015,7 +1019,8 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 			return
 		}
 		n.MqttBroker.ConnectToBoker()
-		n.MqttBroker.PublishTranscoderOnline()
+		//***calling this in OnConnect handler in plutusmq.go***
+		// n.MqttBroker.PublishTranscoderLoadCapacity("starter.go:1021")
 	}
 
 	time.Sleep(1 * time.Second)

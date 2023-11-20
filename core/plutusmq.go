@@ -45,11 +45,14 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 	}
 
 	if LPNode.NodeType == OrchestratorNode {
-		LPNode.MqttBroker.PublishOrchestratorOnline()
+		LPNode.TranscoderManager.RTmutex.Lock()
+		LPNode.MqttBroker.PublishOrchestratorOnline("plutusmq.go:49")
+		LPNode.TranscoderManager.RTmutex.Unlock()
+
 		LPNode.MqttBroker.SubOrchestrator()
 	}
 	if LPNode.NodeType == TranscoderNode {
-		LPNode.MqttBroker.PublishTranscoderOnline()
+		LPNode.MqttBroker.PublishTranscoderOnline("plutusmq.go:55")
 		LPNode.MqttBroker.SubTranscoder()
 	}
 }
@@ -146,10 +149,12 @@ func (pmq *PlutusMQ) SubTranscoder() {
 
 	//pmq.PLSubscribe("plutus/mothership/discovery/orchestrator/#", 1, pmq.cb_orchestrator_discovery)
 	pmq.SubDebug()
+	pmq.SubCommand()
 }
 
 func (pmq *PlutusMQ) SubOrchestrator() {
 	pmq.SubDebug()
+	pmq.SubCommand()
 }
 
 func (pmq *PlutusMQ) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) {
@@ -200,6 +205,12 @@ func (pmq *PlutusMQ) SubDebug() {
 	glog.V(common.VERBOSE).Info("Subscribed to orchestrator debug topic")
 }
 
+func (pmq *PlutusMQ) SubCommand() {
+	topic := fmt.Sprintf("plutus/command/%s", pmq.Node.UID)
+	pmq.Subscribe(topic, 0, pmq.cb_command)
+	glog.V(common.VERBOSE).Info("Subscribed to command topic")
+}
+
 func (pmq *PlutusMQ) UnsubOrchestratorTelemetry(id string) {
 	topic := fmt.Sprintf("plutus/orchestrator/telemetry/%s", id)
 	pmq.Unsubscribe(topic)
@@ -245,9 +256,6 @@ func (pmq *PlutusMQ) cb_orchestrator_discovery(client mqtt.Client, msg mqtt.Mess
 func (pmq *PlutusMQ) cb_debug(client mqtt.Client, msg mqtt.Message) {
 	payload := string(msg.Payload())
 
-	pmq.Node.poMu.RLock()
-	defer pmq.Node.poMu.RUnlock()
-
 	if payload == "all" || strings.Contains(payload, pmq.Node.UID) {
 		glog.V(common.VERBOSE).Infof("Orchestrator debug triggered: %s", payload)
 		if *pmq.Node.LivepeerConfig.Orchestrator {
@@ -262,6 +270,36 @@ func (pmq *PlutusMQ) cb_debug(client mqtt.Client, msg mqtt.Message) {
 	}
 
 	glog.V(common.VERBOSE).Infof("Orchestrator debug do nothing: %s", payload)
+}
+
+func (pmq *PlutusMQ) cb_command(client mqtt.Client, msg mqtt.Message) {
+	payload := string(msg.Payload())
+
+	if *pmq.Node.LivepeerConfig.Orchestrator {
+		switch payload {
+		case "telemetry":
+			pmq.Node.TranscoderManager.RTmutex.Lock()
+			pmq.PublishOrchestratorOnline("plutusmq.go:282")
+			pmq.Node.TranscoderManager.RTmutex.Unlock()
+			return
+		case "default":
+			glog.V(common.VERBOSE).Info("orchestrator command is not recognized")
+			return
+		}
+	}
+
+	if *pmq.Node.LivepeerConfig.Transcoder {
+		switch payload {
+		case "telemetry":
+			pmq.PublishTranscoderLoadCapacity("plutusmq.go:294")
+			return
+		case "default":
+			glog.V(common.VERBOSE).Info("transcoder command is not recognized")
+			return
+		}
+	}
+
+	glog.V(common.VERBOSE).Info("node is neither an orchestrator nor a transcoder")
 }
 
 func (pmq *PlutusMQ) cb_orchestrator_telemetry(client mqtt.Client, msg mqtt.Message) {
@@ -340,7 +378,7 @@ func (pmq *PlutusMQ) cb_transcoder_telemetry(client mqtt.Client, msg mqtt.Messag
 	glog.V(common.VERBOSE).Info("Transcoder telemetry callback triggered")
 }
 
-func (pmq *PlutusMQ) PublishOrchestratorOnline() {
+func (pmq *PlutusMQ) PublishOrchestratorOnline(source string) {
 	id := *pmq.Node.LivepeerConfig.UUID
 	topic := fmt.Sprintf("plutus/orchestrator/telemetry/%s", id)
 	load, _, _, _ := pmq.Node.TranscoderManager.totalLoadAndCapacity()
@@ -348,30 +386,32 @@ func (pmq *PlutusMQ) PublishOrchestratorOnline() {
 		"Online":     true,
 		"ServiceURI": pmq.Node.LivepeerConfig.ServiceAddr,
 		"Load":       load,
+		"Source":     source,
 	}
 	payload, _ := json.Marshal(telem)
 	pmq.Client.Publish(topic, 0, true, payload)
 	glog.V(common.VERBOSE).Info("Publish orchestrator online")
 }
 
-func (pmq *PlutusMQ) PublishTranscoderOnline() {
+func (pmq *PlutusMQ) PublishTranscoderOnline(source string) {
 	topic := fmt.Sprintf("plutus/transcoder/telemetry/%s", pmq.Node.UID)
 
 	ip, _ := common.GetPublicIP()
-
+	load, remainingCap := pmq.Node.GetTranscoderLoadAndCapacity()
 	telem := map[string]interface{}{
 		"IP":            ip,
 		"Online":        true,
-		"Load":          0,
+		"Load":          load,
 		"TotalCapacity": MaxSessions,
-		"RemainingCap":  MaxSessions,
+		"RemainingCap":  remainingCap,
+		"Source":        source,
 	}
 	payload, _ := json.Marshal(telem)
-	pmq.Client.Publish(topic, 0, true, payload)
+	pmq.Client.Publish(topic, 1, true, payload)
 	glog.V(common.VERBOSE).Info("Publish transcoder online")
 }
 
-func (pmq *PlutusMQ) PublishTranscoderConnection(rt *RemoteTranscoder, terminate bool) {
+func (pmq *PlutusMQ) PublishTranscoderConnection(rt *RemoteTranscoder, terminate bool, source string) {
 	topic := fmt.Sprintf("plutus/orchestrator/t_connect/%s", *pmq.Node.LivepeerConfig.UUID)
 	telem := map[string]interface{}{
 		"Transcoder":      rt.EthereumAddr.String(),
@@ -380,13 +420,14 @@ func (pmq *PlutusMQ) PublishTranscoderConnection(rt *RemoteTranscoder, terminate
 		"Terminated":      terminate,
 		"ConnEstablished": rt.ConnTimestamp,
 		"Timestamp":       time.Now().Unix(),
+		"Source":          source,
 	}
 	payload, _ := json.Marshal(telem)
 	pmq.Client.Publish(topic, 0, true, payload)
 	glog.V(common.VERBOSE).Infof("Publish transcoder connection: {Transcoder: %s, Sessions: %d, Terminated: %t, ConnEstablished: %d}", rt.EthereumAddr.String(), rt.LocalLoad, terminate, rt.ConnTimestamp)
 }
 
-func (pmq *PlutusMQ) PublishTranscoderLoadCapacity() {
+func (pmq *PlutusMQ) PublishTranscoderLoadCapacity(source string) {
 	load, remainingCap := pmq.Node.GetTranscoderLoadAndCapacity()
 
 	telem := map[string]interface{}{
@@ -394,6 +435,7 @@ func (pmq *PlutusMQ) PublishTranscoderLoadCapacity() {
 		"Load":          load,
 		"RemainingCap":  remainingCap,
 		"TotalCapacity": MaxSessions,
+		"Source":        source,
 	}
 	payload, _ := json.Marshal(telem)
 
@@ -422,6 +464,7 @@ func (pmq *PlutusMQ) PublishOrchestratorDebug() {
 	id := pmq.Node.UID
 	topic := fmt.Sprintf("plutus/debug/orchestrator/%s", id)
 
+	pmq.Node.TranscoderManager.RTmutex.Lock()
 	load, capacity, remainingCapacity, numConnectedTranscoders := pmq.Node.TranscoderManager.totalLoadAndCapacity()
 
 	connectedTranscoders := pmq.Node.TranscoderManager.remoteTranscoders
@@ -434,7 +477,10 @@ func (pmq *PlutusMQ) PublishOrchestratorDebug() {
 		"ConnectedTranscoders":    connectedTranscoders,
 	}
 	payload, _ := json.Marshal(telem)
-	pmq.Client.Publish(topic, 0, false, payload)
+
+	pmq.Node.TranscoderManager.RTmutex.Unlock()
+
+	pmq.Client.Publish(topic, 1, false, payload)
 	glog.V(common.VERBOSE).Info("Publish orchestrator debug")
 }
 
@@ -454,7 +500,8 @@ func (pmq *PlutusMQ) PublishTranscoderDebug() {
 		keys[i] = key
 		i++
 	}
-
+	am := pmq.Node.ActiveManifests
+	glog.V(common.VERBOSE).Infof("Active manifests: %v", len(am))
 	//plutusOrchs, _ := json.Marshal(pmq.Node.PlutusOrchs)
 	telem := map[string]interface{}{
 		"MaxSessions":         MaxSessions,
@@ -462,8 +509,9 @@ func (pmq *PlutusMQ) PublishTranscoderDebug() {
 		"RemainingCapacity":   remainingCapacity,
 		"PlutusOrchestrators": pmq.Node.PlutusOrchs,
 		"TStopChannels":       keys,
+		"ActiveManifests":     am,
 	}
 	payload, _ := json.Marshal(telem)
-	pmq.Client.Publish(topic, 0, false, payload)
+	pmq.Client.Publish(topic, 1, false, payload)
 	glog.V(common.VERBOSE).Info("Publish orchestrator debug")
 }
