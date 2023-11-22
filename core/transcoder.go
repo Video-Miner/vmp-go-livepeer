@@ -710,6 +710,11 @@ func ManageTranscoderInstance(n *LivepeerNode, id string) {
 		return
 	}
 
+	if orch.ServiceURI == "" {
+		glog.Warningf("Skipping orch `%s` because it has no service URI", orch.Id)
+		return
+	}
+
 	latencyThreshold := *n.LivepeerConfig.LatencyThreshold
 	if orch.Latency <= 0 {
 		segments := strings.Split(orch.ServiceURI, ":")

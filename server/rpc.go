@@ -49,7 +49,7 @@ type Orchestrator interface {
 	TranscoderSecret() string
 	Sign([]byte) ([]byte, error)
 	VerifySig(ethcommon.Address, string, []byte) bool
-	CheckCapacity(core.ManifestID) error
+	CheckCapacity(core.ManifestID, string) error
 	TranscodeSeg(context.Context, *core.SegTranscodingMetadata, *stream.HLSSegment) (*core.TranscodeResult, error)
 	ServeTranscoder(stream net.Transcoder_RegisterTranscoderServer, capacity int, remainingCap int, capabilities *net.Capabilities, ethAddress ethcommon.Address, uid string, poolVersion string, latency int64)
 	TranscoderResults(job int64, res *core.RemoteTranscoderResult)
@@ -403,7 +403,7 @@ func verifyOrchestratorReq(orch Orchestrator, addr ethcommon.Address, sig []byte
 		glog.Error("orchestrator req sig check failed")
 		return fmt.Errorf("orchestrator req sig check failed")
 	}
-	return orch.CheckCapacity("")
+	return orch.CheckCapacity("", "rpc.go:406")
 }
 
 type discoveryAuthWebhookRes struct {
