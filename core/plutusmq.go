@@ -354,6 +354,7 @@ func (pmq *PlutusMQ) cb_transcoder_telemetry(client mqtt.Client, msg mqtt.Messag
 	//unsubscribe from the transcoder
 	if remoteTranscoder == nil {
 		pmq.Unsubscribe(topic)
+		glog.V(common.VERBOSE).Infof("orch unsubscribed from transcoder at plutusmq.go:357 due to the following payload: %v", payload)
 		return
 	}
 
@@ -361,7 +362,8 @@ func (pmq *PlutusMQ) cb_transcoder_telemetry(client mqtt.Client, msg mqtt.Messag
 		switch attrib {
 		case "Online":
 			if !value.(bool) {
-				pmq.Unsubscribe(topic)
+				// pmq.Unsubscribe(topic)
+				glog.V(common.VERBOSE).Infof("DEBUG: orch would have unsubscribed from transcoder at plutusmq.go:366 due to the following payload: %v", payload)
 			}
 		case "Load":
 			remoteTranscoder.TotalLoad = int(value.(float64))
@@ -423,7 +425,7 @@ func (pmq *PlutusMQ) PublishTranscoderConnection(rt *RemoteTranscoder, terminate
 		"Source":          source,
 	}
 	payload, _ := json.Marshal(telem)
-	pmq.Client.Publish(topic, 0, true, payload)
+	pmq.Client.Publish(topic, 1, true, payload)
 	glog.V(common.VERBOSE).Infof("Publish transcoder connection: {Transcoder: %s, Sessions: %d, Terminated: %t, ConnEstablished: %d}", rt.EthereumAddr.String(), rt.LocalLoad, terminate, rt.ConnTimestamp)
 }
 

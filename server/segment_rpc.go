@@ -404,7 +404,7 @@ func verifySegCreds(ctx context.Context, orch Orchestrator, segCreds string, bro
 		return nil, ctx, errors.New("expired auth token")
 	}
 
-	if err := orch.CheckCapacity(core.ManifestID(segData.AuthToken.SessionId)); err != nil {
+	if err := orch.CheckCapacity(core.ManifestID(segData.AuthToken.SessionId), "segment_rpc.go:407"); err != nil {
 		clog.Errorf(ctx, "Cannot process manifest err=%q", err)
 		return nil, ctx, err
 	}

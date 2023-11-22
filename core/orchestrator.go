@@ -88,7 +88,7 @@ func (orch *orchestrator) TranscoderSecret() string {
 	return orch.node.OrchSecret
 }
 
-func (orch *orchestrator) CheckCapacity(mid ManifestID) error {
+func (orch *orchestrator) CheckCapacity(mid ManifestID, source string) error {
 	orch.node.segmentMutex.RLock()
 	defer orch.node.segmentMutex.RUnlock()
 	if _, ok := orch.node.SegmentChans[mid]; ok {
@@ -96,7 +96,7 @@ func (orch *orchestrator) CheckCapacity(mid ManifestID) error {
 	}
 	orch.node.TranscoderManager.RTmutex.Lock()
 	load, capacity, remainingCap, numTranscoders := orch.node.TranscoderManager.totalLoadAndCapacity()
-	glog.Info("Get total load and capacity:")
+	glog.Infof("Get total load and capacity. Called by: ", source)
 	glog.Infof("Total load: %v, capacity: %v, remaining capacity: %v, numTranscoders: %v", load, capacity, remainingCap, numTranscoders)
 	orch.node.TranscoderManager.RTmutex.Unlock()
 	if remainingCap < 1 {
