@@ -55,9 +55,9 @@ var (
 	txCostMultiplier = 100
 
 	// The interval at which to clean up cached max float values for PM senders and balances per stream
-	cleanupInterval = 1 * time.Minute
+	cleanupInterval = 10 * time.Minute
 	// The time to live for cached max float values for PM senders (else they will be cleaned up) in seconds
-	smTTL = 60 // 1 minute
+	smTTL = 172800 // 2 days
 )
 
 const (
@@ -74,28 +74,24 @@ const (
 func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 	if *cfg.MaxSessions == "auto" && *cfg.Orchestrator {
 		if *cfg.Transcoder {
-			glog.Fatal("-maxSessions 'auto' cannot be used when both -orchestrator and -transcoder are specified")
-			return
+			glog.Exit("-maxSessions 'auto' cannot be used when both -orchestrator and -transcoder are specified")
 		}
 		core.MaxSessions = 0
 	} else {
 		intMaxSessions, err := strconv.Atoi(*cfg.MaxSessions)
 		if err != nil || intMaxSessions <= 0 {
-			glog.Fatal("-maxSessions must be 'auto' or greater than zero")
-			return
+			glog.Exit("-maxSessions must be 'auto' or greater than zero")
 		}
 
 		core.MaxSessions = intMaxSessions
 	}
 
 	if *cfg.Netint != "" && *cfg.Nvidia != "" {
-		glog.Fatal("both -netint and -nvidia arguments specified, this is not supported")
-		return
+		glog.Exit("both -netint and -nvidia arguments specified, this is not supported")
 	}
 
 	if *cfg.DetectionSampleRate <= 0 {
-		glog.Fatal("-detectionSampleRate must be greater than zero")
-		return
+		glog.Exit("-detectionSampleRate must be greater than zero")
 	}
 
 	blockPollingTime := time.Duration(*cfg.BlockPollingInterval) * time.Second
@@ -238,8 +234,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 			if *cfg.TestTranscoder {
 				transcoderCaps, err = core.TestTranscoderCapabilities(devices, tf)
 				if err != nil {
-					glog.Fatal(err)
-					return
+					glog.Exit(err)
 				}
 			} else {
 				// no capability test was run, assume default capabilities
@@ -362,18 +357,16 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 				if (ethAcctAddr == ethcommon.Address{}.Hex()) || ethKeystoreAddr == ethAcctAddr {
 					*cfg.EthAcctAddr = ethKeystoreAddr
 				} else {
-					glog.Fatal("-ethKeystorePath and -ethAcctAddr were both provided, but ethAcctAddr does not match the address found in keystore")
-					return
+					glog.Exit("-ethKeystorePath and -ethAcctAddr were both provided, but ethAcctAddr does not match the address found in keystore")
 				}
 			}
 		} else {
-			glog.Fatal(fmt.Errorf(err.Error()))
-			return
+			glog.Exit(fmt.Errorf(err.Error()))
 		}
 
 		//Get the Eth client connection information
 		if *cfg.EthUrl == "" {
-			glog.Fatal("Need to specify an Ethereum node JSON-RPC URL using -ethUrl")
+			glog.Exit("Need to specify an Ethereum node JSON-RPC URL using -ethUrl")
 		}
 
 		//Set up eth client
@@ -626,13 +619,16 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 
 		}
 		if n.NodeType == core.BroadcasterNode {
-			ev, _ := new(big.Rat).SetString(*cfg.MaxTicketEV)
-			if ev == nil {
+			maxEV, _ := new(big.Rat).SetString(*cfg.MaxTicketEV)
+			if maxEV == nil {
 				panic(fmt.Errorf("-maxTicketEV must be a valid rational number, but %v provided. Restart the node with a valid value for -maxTicketEV", *cfg.MaxTicketEV))
 			}
-
-			if ev.Cmp(big.NewRat(0, 1)) < 0 {
+			if maxEV.Cmp(big.NewRat(0, 1)) < 0 {
 				panic(fmt.Errorf("-maxTicketEV must not be negative, but %v provided. Restart the node with a valid value for -maxTicketEV", *cfg.MaxTicketEV))
+			}
+			maxTotalEV, _ := new(big.Rat).SetString(*cfg.MaxTotalEV)
+			if maxTotalEV.Cmp(big.NewRat(0, 1)) < 0 {
+				panic(fmt.Errorf("-maxTotalEV must not be negative, but %v provided. Restart the node with a valid value for -maxTotalEV", *cfg.MaxTotalEV))
 			}
 
 			if *cfg.DepositMultiplier <= 0 {
@@ -648,7 +644,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 			glog.Info("Broadcaster Deposit: ", eth.FormatUnits(info.Deposit, "ETH"))
 			glog.Info("Broadcaster Reserve: ", eth.FormatUnits(info.Reserve.FundsRemaining, "ETH"))
 
-			n.Sender = pm.NewSender(n.Eth, timeWatcher, senderWatcher, ev, *cfg.DepositMultiplier)
+			n.Sender = pm.NewSender(n.Eth, timeWatcher, senderWatcher, maxEV, maxTotalEV, *cfg.DepositMultiplier)
 
 			if *cfg.PixelsPerUnit <= 0 {
 				// Can't divide by 0
@@ -802,7 +798,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 	if *cfg.AuthWebhookURL != "" {
 		parsedUrl, err := validateURL(*cfg.AuthWebhookURL)
 		if err != nil {
-			glog.Fatal("Error setting auth webhook URL ", err)
+			glog.Exit("Error setting auth webhook URL ", err)
 		}
 		glog.Info("Using auth webhook URL ", parsedUrl.Redacted())
 		server.AuthWebhookURL = parsedUrl
@@ -811,7 +807,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 	if *cfg.DetectionWebhookURL != "" {
 		parsedUrl, err := validateURL(*cfg.DetectionWebhookURL)
 		if err != nil {
-			glog.Fatal("Error setting detection webhook URL ", err)
+			glog.Exit("Error setting detection webhook URL ", err)
 		}
 		glog.Info("Using detection webhook URL ", parsedUrl.Redacted())
 		server.DetectionWebhookURL = parsedUrl
@@ -851,7 +847,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 		if *cfg.OrchWebhookURL != "" {
 			whurl, err := validateURL(*cfg.OrchWebhookURL)
 			if err != nil {
-				glog.Fatal("Error setting orch webhook URL ", err)
+				glog.Exit("Error setting orch webhook URL ", err)
 			}
 			glog.Info("Using orchestrator webhook URL ", whurl)
 			n.OrchestratorPool = discovery.NewWebhookPool(bcast, whurl)
@@ -890,7 +886,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 		if *cfg.VerifierURL != "" {
 			_, err := validateURL(*cfg.VerifierURL)
 			if err != nil {
-				glog.Fatal("Error setting verifier URL ", err)
+				glog.Exit("Error setting verifier URL ", err)
 			}
 			glog.Info("Using the Epic Labs classifier for verification at ", *cfg.VerifierURL)
 			server.Policy = &verification.Policy{Retries: 2, Verifier: &verification.EpicClassifier{Addr: *cfg.VerifierURL}}
@@ -898,7 +894,7 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 			// Set the verifier path. Remove once [1] is implemented!
 			// [1] https://github.com/livepeer/verification-classifier/issues/64
 			if drivers.NodeStorage == nil && *cfg.VerifierPath == "" {
-				glog.Fatal("Requires a path to the verifier shared volume when local storage is in use; use -verifierPath or -objectStore")
+				glog.Exit("Requires a path to the verifier shared volume when local storage is in use; use -verifierPath or -objectStore")
 			}
 			verification.VerifierPath = *cfg.VerifierPath
 		} else if localVerify {
@@ -912,12 +908,13 @@ func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 	} else { //if n.NodeType == core.OrchestratorNode {
 		suri, err := getServiceURI(n, *cfg.ServiceAddr)
 		if err != nil {
-			glog.Fatal("Error getting service URI: ", err)
+			glog.Exit("Error getting service URI: ", err)
 		}
 		n.SetServiceURI(suri)
 		// if http addr is not provided, listen to all ifaces
 		// take the port to listen to from the service URI
 		*cfg.HttpAddr = defaultAddr(*cfg.HttpAddr, "", n.GetServiceURI().Port())
+
 		glog.Infof("Public IP: %s", suri.String())
 	}
 	n.Capabilities = core.NewCapabilities(transcoderCaps, core.MandatoryOCapabilities())
