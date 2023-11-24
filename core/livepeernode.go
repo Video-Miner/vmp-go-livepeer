@@ -87,6 +87,7 @@ type LivepeerConfig struct {
 	TicketEV                     *string
 	MaxFaceValue                 *string
 	MaxTicketEV                  *string
+	MaxTotalEV                   *string
 	DepositMultiplier            *int
 	PricePerUnit                 *int
 	PixelsPerUnit                *int
@@ -171,9 +172,10 @@ func DefaultLivepeerConfig() LivepeerConfig {
 	defaultMaxGasPrice := 0
 	defaultEthController := ""
 	defaultInitializeRound := false
-	defaultTicketEV := "1000000000000"
+	defaultTicketEV := "8000000000"
 	defaultMaxFaceValue := "0"
 	defaultMaxTicketEV := "3000000000000"
+	defaultMaxTotalEV := "20000000000000"
 	defaultDepositMultiplier := 1
 	defaultMaxPricePerUnit := 0
 	defaultPixelsPerUnit := 1
@@ -267,6 +269,7 @@ func DefaultLivepeerConfig() LivepeerConfig {
 		TicketEV:               &defaultTicketEV,
 		MaxFaceValue:           &defaultMaxFaceValue,
 		MaxTicketEV:            &defaultMaxTicketEV,
+		MaxTotalEV:             &defaultMaxTotalEV,
 		DepositMultiplier:      &defaultDepositMultiplier,
 		MaxPricePerUnit:        &defaultMaxPricePerUnit,
 		PixelsPerUnit:          &defaultPixelsPerUnit,
