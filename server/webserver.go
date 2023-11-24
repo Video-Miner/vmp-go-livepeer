@@ -113,5 +113,9 @@ func (s *LivepeerServer) cliWebServerHandlers(bindAddr string) *http.ServeMux {
 		mux.Handle("/metrics", monitor.Exporter)
 	}
 
+	// VMP Custom
+	//mux.Handle("/startTranscoder", s.startTranscoderHandler())
+	mux.Handle("/stopTranscoder", s.stopTranscoderHandler())
+
 	return mux
 }

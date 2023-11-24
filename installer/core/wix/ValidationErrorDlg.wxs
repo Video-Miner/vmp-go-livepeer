@@ -1,0 +1,23 @@
+﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+   <Fragment>
+      <UI>
+         <Dialog Id="ValidationErrorDlg" Width="270" Height="140" Title="!(loc.InstallDirDlg_Title)">
+            <Control Id="OK" Type="PushButton" X="100" Y="105" Width="56" Height="17" Text="!(loc.WixUIOK)">
+               <Publish Event="EndDialog" Value="Return" />
+            </Control>
+            
+            <Control Id="ValidationErrorInstructions"     Type="Text" X="20" Y="15" Width="320" Height="15" NoPrefix="yes" Text="!(loc.ValidationErrorInstructions)"/>
+
+            <Control Id="InvalidEthAddr"     Type="Text" X="20" Y="40" Width="320" Height="15" NoPrefix="yes" 
+               Text="!(loc.InvalidTranscoderInputs)" ShowCondition="VALID_ETH_ADDR = &quot;1&quot;" HideCondition="VALID_ETH_ADDR = &quot;0&quot; OR VALID_ETH_ADDR = &quot;-1&quot;"/>             
+            <Control Id="InvalidGPUId"       Type="Text" X="20" Y="55" Width="320" Height="15" NoPrefix="yes" 
+               Text="!(loc.InvalidGPUInputs)" ShowCondition="VALID_GPU_IDS = &quot;1&quot;" HideCondition="VALID_GPU_IDS = &quot;0&quot; OR VALID_GPU_IDS = &quot;-1&quot;"/>
+            <Control Id="InvalidAuthToken" Type="Text" X="20" Y="70" Width="320" Height="15" NoPrefix="yes" 
+               Text="!(loc.InvalidAuthToken)" ShowCondition="VALID_AUTH_TOKEN = &quot;1&quot;" HideCondition="VALID_AUTH_TOKEN = &quot;0&quot; OR VALID_AUTH_TOKEN = &quot;-1&quot;"/>
+            <Control Id="InvalidMaxSessions" Type="Text" X="20" Y="85" Width="320" Height="15" NoPrefix="yes" 
+               Text="!(loc.InvalidMaxSessions)" ShowCondition="VALID_MAX_SESSIONS = &quot;1&quot;" HideCondition="VALID_MAX_SESSIONS = &quot;0&quot; OR VALID_MAX_SESSIONS = &quot;-1&quot;"/>
+             
+         </Dialog>
+      </UI>
+   </Fragment>
+</Wix>

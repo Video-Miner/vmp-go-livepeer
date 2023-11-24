@@ -113,6 +113,7 @@ type (
 		kOrchestratorURI              tag.Key
 		kOrchestratorAddress          tag.Key
 		kFVErrorType                  tag.Key
+		kTranscoderURI                tag.Key
 		mSegmentSourceAppeared        *stats.Int64Measure
 		mSegmentEmerged               *stats.Int64Measure
 		mSegmentEmergedUnprocessed    *stats.Int64Measure
@@ -133,6 +134,19 @@ type (
 		mTranscodersNumber            *stats.Int64Measure
 		mTranscodersCapacity          *stats.Int64Measure
 		mTranscodersLoad              *stats.Int64Measure
+		mTranscoderLoad               *stats.Int64Measure
+		mTranscoderTotalLoad          *stats.Int64Measure
+		mTranscoderCap                *stats.Int64Measure
+		mTranscoderRemainingCap       *stats.Int64Measure
+		mTranscoderPPMSEnc            *stats.Float64Measure
+		mTranscoderPPMSEncAvg         *stats.Float64Measure
+		mTranscoderPPMSEncVar         *stats.Float64Measure
+		mTranscoderPPMSDec            *stats.Float64Measure
+		mTranscoderPPMSDecAvg         *stats.Float64Measure
+		mTranscoderPPMSDecVar         *stats.Float64Measure
+		mTranscoderRealtimeRatio      *stats.Float64Measure
+		mTranscoderRealtimeRatioAvg   *stats.Float64Measure
+		mTranscoderRealtimeRatioVar   *stats.Float64Measure
 		mSuccessRate                  *stats.Float64Measure
 		mSuccessRatePerStream         *stats.Float64Measure
 		mTranscodeTime                *stats.Float64Measure
@@ -250,6 +264,7 @@ func InitCensus(nodeType NodeType, version string) {
 	census.kOrchestratorURI = tag.MustNewKey("orchestrator_uri")
 	census.kOrchestratorAddress = tag.MustNewKey("orchestrator_address")
 	census.kFVErrorType = tag.MustNewKey("fverror_type")
+	census.kTranscoderURI = tag.MustNewKey("transcoder_uri")
 	census.kSegClassName = tag.MustNewKey("seg_class_name")
 	census.ctx, err = tag.New(ctx, tag.Insert(census.kNodeType, string(nodeType)), tag.Insert(census.kNodeID, NodeID))
 	if err != nil {
@@ -282,7 +297,20 @@ func InitCensus(nodeType NodeType, version string) {
 	census.mTranscodeRetried = stats.Int64("transcode_retried", "Number of times segment transcode was retried", "tot")
 	census.mTranscodersNumber = stats.Int64("transcoders_number", "Number of transcoders currently connected to orchestrator", "tot")
 	census.mTranscodersCapacity = stats.Int64("transcoders_capacity", "Total advertised capacity of transcoders currently connected to orchestrator", "tot")
-	census.mTranscodersLoad = stats.Int64("transcoders_load", "Total load of transcoders currently connected to orchestrator", "tot")
+	census.mTranscodersLoad = stats.Int64("transcoders_load", "Total local load of transcoders currently connected to orchestrator", "tot")
+	census.mTranscoderLoad = stats.Int64("transcoder_load", "Local load of each transcoder", "tot")
+	census.mTranscoderTotalLoad = stats.Int64("transcoder_total_load", "Total load of each transcoder", "tot")
+	census.mTranscoderCap = stats.Int64("transcoder_capacity", "Capacity of each transcoder", "tot")
+	census.mTranscoderRemainingCap = stats.Int64("transcoder_remaining_capacity", "Remaining pool capacity of each transcoder", "tot")
+	census.mTranscoderPPMSEnc = stats.Float64("transcoder_pixels_per_ms_encoded", "Amount of pixels encoded per millisecond per transcoder", "tot")
+	census.mTranscoderPPMSEncAvg = stats.Float64("transcoder_pixels_per_ms_encoded_avg", "Average amount of pixels encoded per millisecond per transcoder", "tot")
+	census.mTranscoderPPMSEncVar = stats.Float64("transcoder_pixels_per_ms_encoded_var", "Variance in the amount of pixels encoded per millisecond per transcoder", "tot")
+	census.mTranscoderPPMSDec = stats.Float64("transcoder_pixels_per_ms_decoded", "Amount of pixels decoded per millisecond per transcoder", "tot")
+	census.mTranscoderPPMSDecAvg = stats.Float64("transcoder_pixels_per_ms_decoded_avg", "Average amount of pixels decoded per millisecond per transcoder", "tot")
+	census.mTranscoderPPMSDecVar = stats.Float64("transcoder_pixels_per_ms_decoded_var", "Variance in the amount of pixels decoded per millisecond per transcoder", "tot")
+	census.mTranscoderRealtimeRatio = stats.Float64("transcoder_segment_transcoded_realtime_ratio", "Ratio of source segment duration / transcode time as measured by orchestrator", "rat")
+	census.mTranscoderRealtimeRatioAvg = stats.Float64("transcoder_segment_transcoded_realtime_ratio_average", "Average realtime ratio per transcoder", "rat")
+	census.mTranscoderRealtimeRatioVar = stats.Float64("transcoder_segment_transcoded_realtime_ratio_variance", "Variance in the realtime ratio per transcoder", "rat")
 	census.mSuccessRate = stats.Float64("success_rate", "Success rate", "per")
 	census.mSuccessRatePerStream = stats.Float64("success_rate_per_stream", "Success rate, per stream", "per")
 	census.mTranscodeTime = stats.Float64("transcode_time_seconds", "Transcoding time", "sec")
@@ -653,6 +681,104 @@ func InitCensus(nodeType NodeType, version string) {
 			Description: "Total load of transcoders currently connected to orchestrator",
 			TagKeys:     baseTags,
 			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_local_load",
+			Measure:     census.mTranscoderLoad,
+			Description: "Local load of each transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_total_load",
+			Measure:     census.mTranscoderTotalLoad,
+			Description: "Total load of each transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_capacity",
+			Measure:     census.mTranscoderCap,
+			Description: "Capacity of each transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_remaining_capacity",
+			Measure:     census.mTranscoderRemainingCap,
+			Description: "Remaining capacity of each pool transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_encoded",
+			Measure:     census.mTranscoderPPMSEnc,
+			Description: "Amount of pixels encoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_encoded_avg",
+			Measure:     census.mTranscoderPPMSEncAvg,
+			Description: "Average amount of pixels encoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_encoded_var",
+			Measure:     census.mTranscoderPPMSEncVar,
+			Description: "Variance in the amount of pixels encoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_decoded",
+			Measure:     census.mTranscoderPPMSDec,
+			Description: "Amount of pixels decoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_decoded_avg",
+			Measure:     census.mTranscoderPPMSDecAvg,
+			Description: "Average amount of pixels decoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_pixels_per_ms_decoded_var",
+			Measure:     census.mTranscoderPPMSDecVar,
+			Description: "Variance in the amount of pixels decoded per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_realtime_ratio",
+			Measure:     census.mTranscoderRealtimeRatio,
+			Description: "Ratio of source segment duration / transcode time as measured on orchestrator",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_realtime_ratio_average",
+			Measure:     census.mTranscoderRealtimeRatioAvg,
+			Description: "Average realtime ratio per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_realtime_ratio_variance",
+			Measure:     census.mTranscoderRealtimeRatioVar,
+			Description: "Variance in the realtime ratio per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.LastValue(),
+		},
+		{
+			Name:        "transcoder_realtime_ratio_distribution",
+			Measure:     census.mTranscoderRealtimeRatio,
+			Description: "Variance in the amount of pixels processed per millisecond per transcoder",
+			TagKeys:     append([]tag.Key{census.kTranscoderURI}, baseTags...),
+			Aggregation: view.Distribution(0, 0.25, 0.50, 1, 2, 4, 8, 16, 32),
 		},
 		{
 			Name:        "orchestrator_swaps",
@@ -1143,6 +1269,39 @@ func SetTranscodersNumberAndLoad(load, capacity, number int) {
 	stats.Record(census.ctx, census.mTranscodersLoad.M(int64(load)))
 	stats.Record(census.ctx, census.mTranscodersCapacity.M(int64(capacity)))
 	stats.Record(census.ctx, census.mTranscodersNumber.M(int64(number)))
+}
+
+func SetTranscoderStats(t_uri string, encodedAverage float64, encodedVariance float64,
+	decodedAverage float64, decodedVariance float64,
+	realTimeAverage float64, realTimeVariance float64) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSEncAvg.M(encodedAverage))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSEncVar.M(encodedVariance))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSDecAvg.M(decodedAverage))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSDecVar.M(decodedVariance))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderRealtimeRatioAvg.M(realTimeAverage))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderRealtimeRatioVar.M(realTimeVariance))
+}
+
+func SetTranscoderLastVals(t_uri string, encodedLastValue float64, decodedLastValue float64, realTimeLastValue float64) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSEnc.M(encodedLastValue))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderPPMSDec.M(decodedLastValue))
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderRealtimeRatio.M(realTimeLastValue))
+}
+
+func SetTranscoderCapacity(t_uri string, capacity int) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderCap.M(int64(capacity)))
+}
+
+func SetTranscoderRemainingCapacity(t_uri string, capacity int) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderRemainingCap.M(int64(capacity)))
+}
+
+func SetTranscoderLocalLoad(t_uri string, load int) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderLoad.M(int64(load)))
+}
+
+func SetTranscoderTotalLoad(t_uri string, load int) {
+	stats.RecordWithTags(census.ctx, manifestIDTag(census.ctx, tag.Insert(census.kTranscoderURI, t_uri)), census.mTranscoderTotalLoad.M(int64(load)))
 }
 
 func SegmentEmerged(ctx context.Context, nonce, seqNo uint64, profilesNum int, dur float64) {

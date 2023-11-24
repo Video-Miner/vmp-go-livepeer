@@ -71,255 +71,7 @@ const (
 	RefreshPerfScoreInterval = 10 * time.Minute
 )
 
-type LivepeerConfig struct {
-	Network                      *string
-	RtmpAddr                     *string
-	CliAddr                      *string
-	HttpAddr                     *string
-	ServiceAddr                  *string
-	OrchAddr                     *string
-	VerifierURL                  *string
-	EthController                *string
-	VerifierPath                 *string
-	LocalVerify                  *bool
-	HttpIngest                   *bool
-	Orchestrator                 *bool
-	Transcoder                   *bool
-	Broadcaster                  *bool
-	OrchSecret                   *string
-	TranscodingOptions           *string
-	MaxAttempts                  *int
-	SelectRandWeight             *float64
-	SelectStakeWeight            *float64
-	SelectPriceWeight            *float64
-	SelectPriceExpFactor         *float64
-	OrchPerfStatsURL             *string
-	Region                       *string
-	MaxPricePerUnit              *int
-	MinPerfScore                 *float64
-	MaxSessions                  *string
-	CurrentManifest              *bool
-	Nvidia                       *string
-	Netint                       *string
-	TestTranscoder               *bool
-	SceneClassificationModelPath *string
-	DetectContent                *bool
-	DetectionSampleRate          *uint
-	EthAcctAddr                  *string
-	EthPassword                  *string
-	EthKeystorePath              *string
-	EthOrchAddr                  *string
-	EthUrl                       *string
-	TxTimeout                    *time.Duration
-	MaxTxReplacements            *int
-	GasLimit                     *int
-	MinGasPrice                  *int64
-	MaxGasPrice                  *int
-	InitializeRound              *bool
-	TicketEV                     *string
-	MaxFaceValue                 *string
-	MaxTicketEV                  *string
-	MaxTotalEV                   *string
-	DepositMultiplier            *int
-	PricePerUnit                 *int
-	PixelsPerUnit                *int
-	AutoAdjustPrice              *bool
-	PricePerBroadcaster          *string
-	BlockPollingInterval         *int
-	Redeemer                     *bool
-	RedeemerAddr                 *string
-	Reward                       *bool
-	Monitor                      *bool
-	MetricsPerStream             *bool
-	MetricsExposeClientIP        *bool
-	MetadataQueueUri             *string
-	MetadataAmqpExchange         *string
-	MetadataPublishTimeout       *time.Duration
-	Datadir                      *string
-	Objectstore                  *string
-	Recordstore                  *string
-	FVfailGsBucket               *string
-	FVfailGsKey                  *string
-	AuthWebhookURL               *string
-	OrchWebhookURL               *string
-	DetectionWebhookURL          *string
-	OrchBlacklist                *string
-}
-
-// DefaultLivepeerConfig creates LivepeerConfig exactly the same as when no flags are passed to the livepeer process.
-func DefaultLivepeerConfig() LivepeerConfig {
-	// Network & Addresses:
-	defaultNetwork := "offchain"
-	defaultRtmpAddr := ""
-	defaultCliAddr := ""
-	defaultHttpAddr := ""
-	defaultServiceAddr := ""
-	defaultOrchAddr := ""
-	defaultVerifierURL := ""
-	defaultVerifierPath := ""
-
-	// Transcoding:
-	defaultOrchestrator := false
-	defaultTranscoder := false
-	defaultBroadcaster := false
-	defaultOrchSecret := ""
-	defaultTranscodingOptions := "P240p30fps16x9,P360p30fps16x9"
-	defaultMaxAttempts := 3
-	defaultSelectRandWeight := 0.3
-	defaultSelectStakeWeight := 0.7
-	defaultSelectPriceWeight := 0.0
-	defaultSelectPriceExpFactor := 100.0
-	defaultMaxSessions := strconv.Itoa(10)
-	defaultOrchPerfStatsURL := ""
-	defaultRegion := ""
-	defaultMinPerfScore := 0.0
-	defaultCurrentManifest := false
-	defaultNvidia := ""
-	defaultNetint := ""
-	defaultTestTranscoder := true
-	defaultDetectContent := false
-	defaultDetectionSampleRate := uint(math.MaxUint32)
-	defaultSceneClassificationModelPath := "tasmodel.pb"
-
-	// Onchain:
-	defaultEthAcctAddr := ""
-	defaultEthPassword := ""
-	defaultEthKeystorePath := ""
-	defaultEthOrchAddr := ""
-	defaultEthUrl := ""
-	defaultTxTimeout := 5 * time.Minute
-	defaultMaxTxReplacements := 1
-	defaultGasLimit := 0
-	defaultMaxGasPrice := 0
-	defaultEthController := ""
-	defaultInitializeRound := false
-	defaultTicketEV := "8000000000"
-	defaultMaxFaceValue := "0"
-	defaultMaxTicketEV := "3000000000000"
-	defaultMaxTotalEV := "20000000000000"
-	defaultDepositMultiplier := 1
-	defaultMaxPricePerUnit := 0
-	defaultPixelsPerUnit := 1
-	defaultAutoAdjustPrice := true
-	defaultPricePerBroadcaster := ""
-	defaultBlockPollingInterval := 5
-	defaultRedeemer := false
-	defaultRedeemerAddr := ""
-	defaultMonitor := false
-	defaultMetricsPerStream := false
-	defaultMetricsExposeClientIP := false
-	defaultMetadataQueueUri := ""
-	defaultMetadataAmqpExchange := "lp_golivepeer_metadata"
-	defaultMetadataPublishTimeout := 1 * time.Second
-
-	// Ingest:
-	defaultHttpIngest := true
-
-	// Verification:
-	defaultLocalVerify := true
-
-	// Storage:
-	defaultDatadir := ""
-	defaultObjectstore := ""
-	defaultRecordstore := ""
-
-	// Fast Verification GS bucket:
-	defaultFVfailGsBucket := ""
-	defaultFVfailGsKey := ""
-
-	// API
-	defaultAuthWebhookURL := ""
-	defaultOrchWebhookURL := ""
-	defaultDetectionWebhookURL := ""
-
-	return LivepeerConfig{
-		// Network & Addresses:
-		Network:      &defaultNetwork,
-		RtmpAddr:     &defaultRtmpAddr,
-		CliAddr:      &defaultCliAddr,
-		HttpAddr:     &defaultHttpAddr,
-		ServiceAddr:  &defaultServiceAddr,
-		OrchAddr:     &defaultOrchAddr,
-		VerifierURL:  &defaultVerifierURL,
-		VerifierPath: &defaultVerifierPath,
-
-		// Transcoding:
-		Orchestrator:                 &defaultOrchestrator,
-		Transcoder:                   &defaultTranscoder,
-		Broadcaster:                  &defaultBroadcaster,
-		OrchSecret:                   &defaultOrchSecret,
-		TranscodingOptions:           &defaultTranscodingOptions,
-		MaxAttempts:                  &defaultMaxAttempts,
-		SelectRandWeight:             &defaultSelectRandWeight,
-		SelectStakeWeight:            &defaultSelectStakeWeight,
-		SelectPriceWeight:            &defaultSelectPriceWeight,
-		SelectPriceExpFactor:         &defaultSelectPriceExpFactor,
-		MaxSessions:                  &defaultMaxSessions,
-		OrchPerfStatsURL:             &defaultOrchPerfStatsURL,
-		Region:                       &defaultRegion,
-		MinPerfScore:                 &defaultMinPerfScore,
-		CurrentManifest:              &defaultCurrentManifest,
-		Nvidia:                       &defaultNvidia,
-		Netint:                       &defaultNetint,
-		TestTranscoder:               &defaultTestTranscoder,
-		SceneClassificationModelPath: &defaultSceneClassificationModelPath,
-		DetectContent:                &defaultDetectContent,
-		DetectionSampleRate:          &defaultDetectionSampleRate,
-
-		// Onchain:
-		EthAcctAddr:            &defaultEthAcctAddr,
-		EthPassword:            &defaultEthPassword,
-		EthKeystorePath:        &defaultEthKeystorePath,
-		EthOrchAddr:            &defaultEthOrchAddr,
-		EthUrl:                 &defaultEthUrl,
-		TxTimeout:              &defaultTxTimeout,
-		MaxTxReplacements:      &defaultMaxTxReplacements,
-		GasLimit:               &defaultGasLimit,
-		MaxGasPrice:            &defaultMaxGasPrice,
-		EthController:          &defaultEthController,
-		InitializeRound:        &defaultInitializeRound,
-		TicketEV:               &defaultTicketEV,
-		MaxFaceValue:           &defaultMaxFaceValue,
-		MaxTicketEV:            &defaultMaxTicketEV,
-		MaxTotalEV:             &defaultMaxTotalEV,
-		DepositMultiplier:      &defaultDepositMultiplier,
-		MaxPricePerUnit:        &defaultMaxPricePerUnit,
-		PixelsPerUnit:          &defaultPixelsPerUnit,
-		AutoAdjustPrice:        &defaultAutoAdjustPrice,
-		PricePerBroadcaster:    &defaultPricePerBroadcaster,
-		BlockPollingInterval:   &defaultBlockPollingInterval,
-		Redeemer:               &defaultRedeemer,
-		RedeemerAddr:           &defaultRedeemerAddr,
-		Monitor:                &defaultMonitor,
-		MetricsPerStream:       &defaultMetricsPerStream,
-		MetricsExposeClientIP:  &defaultMetricsExposeClientIP,
-		MetadataQueueUri:       &defaultMetadataQueueUri,
-		MetadataAmqpExchange:   &defaultMetadataAmqpExchange,
-		MetadataPublishTimeout: &defaultMetadataPublishTimeout,
-
-		// Ingest:
-		HttpIngest: &defaultHttpIngest,
-
-		// Verification:
-		LocalVerify: &defaultLocalVerify,
-
-		// Storage:
-		Datadir:     &defaultDatadir,
-		Objectstore: &defaultObjectstore,
-		Recordstore: &defaultRecordstore,
-
-		// Fast Verification GS bucket:
-		FVfailGsBucket: &defaultFVfailGsBucket,
-		FVfailGsKey:    &defaultFVfailGsKey,
-
-		// API
-		AuthWebhookURL:      &defaultAuthWebhookURL,
-		OrchWebhookURL:      &defaultOrchWebhookURL,
-		DetectionWebhookURL: &defaultDetectionWebhookURL,
-	}
-}
-
-func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
+func StartLivepeer(ctx context.Context, cfg core.LivepeerConfig) {
 	if *cfg.MaxSessions == "auto" && *cfg.Orchestrator {
 		if *cfg.Transcoder {
 			glog.Exit("-maxSessions 'auto' cannot be used when both -orchestrator and -transcoder are specified")
@@ -425,15 +177,25 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 		drivers.SetCreds(*cfg.FVfailGsBucket, *cfg.FVfailGsKey)
 	}
 
+	var dbh *common.DB
+	var err error
 	//Set up DB
-	dbh, err := common.InitDB(*cfg.Datadir + "/lpdb.sqlite3")
+	if *cfg.Transcoder {
+		dbh, err = common.InitDB(":memory:")
+		glog.Info("Opening database in memory")
+	} else {
+		dbh, err = common.InitDB(*cfg.Datadir + "/lpdb.sqlite3")
+		glog.Info("Opening database on filesystem")
+	}
+
 	if err != nil {
 		glog.Errorf("Error opening DB: %v", err)
 		return
 	}
 	defer dbh.Close()
 
-	n, err := core.NewLivepeerNode(nil, *cfg.Datadir, dbh)
+	n, err := core.NewLivepeerNode(nil, *cfg.Datadir, dbh, &cfg)
+	n.UID = *cfg.UUID
 	if err != nil {
 		glog.Errorf("Error creating livepeer node: %v", err)
 	}
@@ -499,13 +261,24 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 				}
 			}
 			// Initialize LB transcoder
-			n.Transcoder = core.NewLoadBalancingTranscoder(devices, tf, dtf)
+			n.Transcoders["base"] = core.NewLoadBalancingTranscoder(devices, tf, dtf)
 		} else {
-			// for local software mode, enable all capabilities
-			transcoderCaps = append(core.DefaultCapabilities(), core.OptionalCapabilities()...)
-			n.Transcoder = core.NewLocalTranscoder(*cfg.Datadir)
+			// GPU device has not been specified
+			glog.Error("GPU device has not been specified")
+			return
 		}
 	}
+
+	//hostname, _ := os.Hostname()
+	var broker = *cfg.MqttBrokerHost
+	var port = *cfg.MqttBrokerPort
+	var clientId = n.UID
+	glog.Info(clientId)
+	var username = clientId
+	var password = clientId
+	pmq := core.NewMQTTClient(n, broker, port, username, password, clientId)
+
+	n.MqttBroker = pmq
 
 	if *cfg.Redeemer {
 		n.NodeType = core.RedeemerNode
@@ -513,7 +286,11 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 		n.NodeType = core.OrchestratorNode
 		if !*cfg.Transcoder {
 			n.TranscoderManager = core.NewRemoteTranscoderManager()
-			n.Transcoder = n.TranscoderManager
+			n.TranscoderManager.MqttBroker = n.MqttBroker
+			go n.TranscoderManager.PoolManager.StatsMonitorLoop()
+			defer n.TranscoderManager.PoolManager.StopStatsMonitorLoop()
+			n.Transcoders["base"] = n.TranscoderManager
+
 		}
 	} else if *cfg.Transcoder {
 		n.NodeType = core.TranscoderNode
@@ -807,19 +584,9 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 			sigVerifier := &pm.DefaultSigVerifier{}
 			validator := pm.NewValidator(sigVerifier, timeWatcher)
 
-			var sm pm.SenderMonitor
-			if *cfg.RedeemerAddr != "" {
-				*cfg.RedeemerAddr = defaultAddr(*cfg.RedeemerAddr, "127.0.0.1", OrchestratorRpcPort)
-				rc, err := server.NewRedeemerClient(*cfg.RedeemerAddr, senderWatcher, timeWatcher)
-				if err != nil {
-					glog.Error("Unable to start redeemer client: ", err)
-					return
-				}
-				sm = rc
-			} else {
-				sm = pm.NewSenderMonitor(smCfg, n.Eth, senderWatcher, timeWatcher, n.Database)
-			}
+			sm := pm.NewSenderMonitor(smCfg, n.Eth, senderWatcher, timeWatcher, n.Database)
 
+			n.TicketChan = sm.GetTicketChannel()
 			// Start sender monitor
 			sm.Start()
 			defer sm.Stop()
@@ -1024,6 +791,7 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 	}
 
 	if lpmon.Enabled {
+		//VMP: Max sessions change again... need to investigate
 		lpmon.MaxSessions(core.MaxSessions)
 	}
 
@@ -1137,9 +905,7 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 		// Set max transcode attempts. <=0 is OK; it just means "don't transcode"
 		server.MaxAttempts = *cfg.MaxAttempts
 
-	} else if n.NodeType == core.OrchestratorNode {
-		*cfg.CliAddr = defaultAddr(*cfg.CliAddr, "127.0.0.1", OrchestratorCliPort)
-
+	} else { //if n.NodeType == core.OrchestratorNode {
 		suri, err := getServiceURI(n, *cfg.ServiceAddr)
 		if err != nil {
 			glog.Exit("Error getting service URI: ", err)
@@ -1148,14 +914,14 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 		// if http addr is not provided, listen to all ifaces
 		// take the port to listen to from the service URI
 		*cfg.HttpAddr = defaultAddr(*cfg.HttpAddr, "", n.GetServiceURI().Port())
-		if !*cfg.Transcoder && n.OrchSecret == "" {
-			glog.Exit("Running an orchestrator requires an -orchSecret for standalone mode or -transcoder for orchestrator+transcoder mode")
-		}
-	} else if n.NodeType == core.TranscoderNode {
-		*cfg.CliAddr = defaultAddr(*cfg.CliAddr, "127.0.0.1", TranscoderCliPort)
-	}
 
+		glog.Infof("Public IP: %s", suri.String())
+	}
 	n.Capabilities = core.NewCapabilities(transcoderCaps, core.MandatoryOCapabilities())
+
+	n.TranscoderCaps = transcoderCaps
+
+	*cfg.CliAddr = defaultAddr(*cfg.CliAddr, "127.0.0.1", OrchestratorCliPort)
 
 	if drivers.NodeStorage == nil {
 		// base URI will be empty for broadcasters; that's OK
@@ -1219,7 +985,7 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 		orch := core.NewOrchestrator(s.LivepeerNode, timeWatcher)
 
 		go func() {
-			err = server.StartTranscodeServer(orch, *cfg.HttpAddr, s.HTTPMux, n.WorkDir, n.TranscoderManager != nil, n)
+			err = server.StartTranscodeServer(orch, *cfg.HttpAddr, s.HTTPMux, n.WorkDir, n.TranscoderManager != nil, n, *cfg.AuthUri)
 			if err != nil {
 				exit("Error starting Transcoder node: err=%q", err)
 			}
@@ -1233,19 +999,51 @@ func StartLivepeer(ctx context.Context, cfg LivepeerConfig) {
 			// shut down orchestrator
 			glog.Infof("Orchestrator not available at %v; shutting down", orch.ServiceURI())
 			tc <- struct{}{}
+		} else {
+			n.MqttBroker.ConnectToBoker()
+
+			//***calling this in OnConnect handler in plutusmq.go***
+			// n.TranscoderManager.RTmutex.Lock()
+			// n.MqttBroker.PublishOrchestratorOnline("starter.go:1009")
+			// n.TranscoderManager.RTmutex.Unlock()
 		}
 
 	}()
 
 	if n.NodeType == core.TranscoderNode {
-		if n.OrchSecret == "" {
-			glog.Exit("Missing -orchSecret")
+		if *cfg.EthAcctAddr == "" {
+			glog.Fatal("Starting a Videominer transcoder requires an ethereum address, use '-ethAcctAddr'")
+			return
 		}
-		if len(orchURLs) <= 0 {
-			glog.Exit("Missing -orchAddr")
-		}
+		n.MqttBroker.ConnectToBoker()
+		//***calling this in OnConnect handler in plutusmq.go***
+		// n.MqttBroker.PublishTranscoderLoadCapacity("starter.go:1021")
+	}
 
-		go server.RunTranscoder(n, orchURLs[0].Host, core.MaxSessions, transcoderCaps)
+	time.Sleep(1 * time.Second)
+	n.NodeInitialized = true
+
+	if n.NodeType == core.OrchestratorNode {
+		go func() {
+			var data map[string]interface{}
+			for {
+				data = <-n.TicketChan
+				var ticket = data["Ticket"].(*pm.Ticket)
+				var txhash = data["TxHash"].(string)
+				glog.Infof("We won a ticket %s", data["TxHash"])
+				n.MqttBroker.PublishWinningTicket(ticket, txhash)
+			}
+		}()
+	}
+
+	// Start the active manifest cleanup goroutine for transcoders. This periodically checks if streams are still active so transcoders can record accurate stream counts
+	if n.NodeType == core.TranscoderNode {
+		go func() {
+			for {
+				n.ActiveManifestCleanup()
+				<-time.After(5 * time.Second)
+			}
+		}()
 	}
 
 	switch n.NodeType {
@@ -1481,7 +1279,7 @@ func getBroadcasterPrices(broadcasterPrices string) []BroadcasterPrice {
 	return pricesSet.Prices
 }
 
-func createSelectionAlgorithm(cfg LivepeerConfig) (common.SelectionAlgorithm, error) {
+func createSelectionAlgorithm(cfg core.LivepeerConfig) (common.SelectionAlgorithm, error) {
 	sumWeight := *cfg.SelectStakeWeight + *cfg.SelectPriceWeight + *cfg.SelectRandWeight
 	if math.Abs(sumWeight-1.0) > 0.0001 {
 		return nil, fmt.Errorf(

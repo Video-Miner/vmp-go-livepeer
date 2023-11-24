@@ -1,0 +1,22 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+   <Fragment>
+      <UI>
+         <Dialog Id="GPUDetailsDlg" Width="370" Height="265" Title="!(loc.InstallDirDlg_Title)">
+            <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17" Cancel="yes" Text="!(loc.WixUIOK)">
+               <Publish Event="EndDialog" Value="Return" />
+            </Control>
+
+            <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.GPUDetailsDlgDescription)" />
+            <Control Id="Title" Type="Text" X="15" Y="6" Width="200" Height="15" Transparent="yes" NoPrefix="yes" Text="!(loc.GPUDetailsDlgTitle)" />
+            <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
+            <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+            <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
+
+            <Control Id="GPUDIdsLabel"       Type="Text" X="20" Y="55" Width="320" Height="20" NoPrefix="yes" Text="!(loc.GPUDetailsDlgGPUIds)" />
+            <Control Id="GPUDetailsLabel"       Type="Text" X="20" Y="80" Width="320" Height="130" NoPrefix="yes" Text="!(loc.GPUDetailsDlgGPUDetails)" />
+
+             
+         </Dialog>
+      </UI>
+   </Fragment>
+</Wix>

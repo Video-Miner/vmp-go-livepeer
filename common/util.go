@@ -11,6 +11,7 @@ import (
 	"math/big"
 	"math/rand"
 	"mime"
+	"net/http"
 	"regexp"
 	"sort"
 	"strconv"
@@ -529,4 +530,21 @@ func ParseEthAddr(strJsonKey string) (string, error) {
 		}
 	}
 	return "", errors.New("Error parsing address from keyfile")
+}
+
+func GetPublicIP() (string, error) {
+	resp, err := http.Get("https://api.ipify.org?format=text")
+	if err != nil {
+		glog.Errorf("Could not look up public IP err=%q", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		glog.Errorf("Could not look up public IP err=%q", err)
+		return "", err
+	}
+	addr := strings.TrimSpace(string(body))
+
+	return addr, err
 }

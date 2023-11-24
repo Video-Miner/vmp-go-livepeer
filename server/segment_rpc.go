@@ -112,7 +112,7 @@ func (h *lphttp) ServeSegment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	oInfo, err := orchestratorInfo(orch, sender, orch.ServiceURI().String(), core.ManifestID(segData.AuthToken.SessionId))
+	oInfo, err := orchestratorInfo(orch, sender, orch.ServiceURI().String())
 	if err != nil {
 		clog.Errorf(ctx, "Error updating orchestrator info - err=%q", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -404,7 +404,7 @@ func verifySegCreds(ctx context.Context, orch Orchestrator, segCreds string, bro
 		return nil, ctx, errors.New("expired auth token")
 	}
 
-	if err := orch.CheckCapacity(core.ManifestID(segData.AuthToken.SessionId)); err != nil {
+	if err := orch.CheckCapacity(core.ManifestID(segData.AuthToken.SessionId), "segment_rpc.go:407"); err != nil {
 		clog.Errorf(ctx, "Cannot process manifest err=%q", err)
 		return nil, ctx, err
 	}
@@ -710,7 +710,7 @@ func estimateFee(seg *stream.HLSSegment, profiles []ffmpeg.VideoProfile, priceIn
 		if framerate == 0 {
 			// FPS is being passed through (no fps adjustment)
 			// TODO incorporate the actual number of frames from the input
-			framerate = 60 // conservative estimate of input fps
+			framerate = 120 // conservative estimate of input fps
 		}
 		framerateDen := p.FramerateDen
 		if framerateDen == 0 {
@@ -864,11 +864,6 @@ func validatePrice(sess *BroadcastSession) error {
 	if maxPrice != nil && oPrice.Cmp(maxPrice) == 1 {
 		return fmt.Errorf("Orchestrator price higher than the set maximum price of %v wei per %v pixels", maxPrice.Num().Int64(), maxPrice.Denom().Int64())
 	}
-	iPrice, err := common.RatPriceInfo(sess.InitialPrice)
-	if err == nil && iPrice != nil && oPrice.Cmp(iPrice) == 1 {
-		return fmt.Errorf("Orchestrator price has changed, Orchestrator price: %v, Orchestrator initial price: %v", oPrice, iPrice)
-	}
-
 	return nil
 }
 

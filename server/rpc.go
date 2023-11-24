@@ -49,13 +49,13 @@ type Orchestrator interface {
 	TranscoderSecret() string
 	Sign([]byte) ([]byte, error)
 	VerifySig(ethcommon.Address, string, []byte) bool
-	CheckCapacity(core.ManifestID) error
+	CheckCapacity(core.ManifestID, string) error
 	TranscodeSeg(context.Context, *core.SegTranscodingMetadata, *stream.HLSSegment) (*core.TranscodeResult, error)
-	ServeTranscoder(stream net.Transcoder_RegisterTranscoderServer, capacity int, capabilities *net.Capabilities)
+	ServeTranscoder(stream net.Transcoder_RegisterTranscoderServer, capacity int, remainingCap int, capabilities *net.Capabilities, ethAddress ethcommon.Address, uid string, poolVersion string, latency int64)
 	TranscoderResults(job int64, res *core.RemoteTranscoderResult)
 	ProcessPayment(ctx context.Context, payment net.Payment, manifestID core.ManifestID) error
 	TicketParams(sender ethcommon.Address, priceInfo *net.PriceInfo) (*net.TicketParams, error)
-	PriceInfo(sender ethcommon.Address, manifestID core.ManifestID) (*net.PriceInfo, error)
+	PriceInfo(sender ethcommon.Address) (*net.PriceInfo, error)
 	SufficientBalance(addr ethcommon.Address, manifestID core.ManifestID) bool
 	DebitFees(addr ethcommon.Address, manifestID core.ManifestID, price *net.PriceInfo, pixels int64)
 	Capabilities() *net.Capabilities
@@ -118,7 +118,6 @@ type BroadcastSession struct {
 	OrchestratorOS   drivers.OSSession
 	PMSessionID      string
 	Balance          Balance
-	InitialPrice     *net.PriceInfo
 }
 
 func (bs *BroadcastSession) Transcoder() string {
@@ -157,6 +156,7 @@ type lphttp struct {
 	orchRPC      *grpc.Server
 	transRPC     *http.ServeMux
 	node         *core.LivepeerNode
+	authUri      *string
 }
 
 func (h *lphttp) EndTranscodingSession(ctx context.Context, request *net.EndTranscodingSessionRequest) (*net.EndTranscodingSessionResponse, error) {
@@ -182,13 +182,14 @@ func (h *lphttp) Ping(context context.Context, req *net.PingPong) (*net.PingPong
 }
 
 // XXX do something about the implicit start of the http mux? this smells
-func StartTranscodeServer(orch Orchestrator, bind string, mux *http.ServeMux, workDir string, acceptRemoteTranscoders bool, n *core.LivepeerNode) error {
+func StartTranscodeServer(orch Orchestrator, bind string, mux *http.ServeMux, workDir string, acceptRemoteTranscoders bool, n *core.LivepeerNode, authUri string) error {
 	s := grpc.NewServer()
 	lp := lphttp{
 		orchestrator: orch,
 		orchRPC:      s,
 		transRPC:     mux,
 		node:         n,
+		authUri:      &authUri,
 	}
 	net.RegisterOrchestratorServer(s, &lp)
 	lp.transRPC.HandleFunc("/segment", lp.ServeSegment)
@@ -237,6 +238,19 @@ func CheckOrchestratorAvailability(orch Orchestrator) bool {
 	}
 
 	return orch.VerifySig(orch.Address(), string(ping), pong.Value)
+}
+
+func sendPing(orchAddr *url.URL, value []byte) (*net.PingPong, error) {
+	orchClient, conn, err := startOrchestratorClient(context.Background(), orchAddr)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), GRPCTimeout)
+	defer cancel()
+
+	return orchClient.Ping(ctx, &net.PingPong{Value: value})
 }
 
 func ping(context context.Context, req *net.PingPong, orch Orchestrator) (*net.PingPong, error) {
@@ -324,7 +338,7 @@ func getOrchestrator(orch Orchestrator, req *net.OrchestratorRequest) (*net.Orch
 	}
 
 	// currently, orchestrator == transcoder
-	return orchestratorInfo(orch, addr, orch.ServiceURI().String(), "")
+	return orchestratorInfo(orch, addr, orch.ServiceURI().String())
 }
 
 func endTranscodingSession(node *core.LivepeerNode, orch Orchestrator, req *net.EndTranscodingSessionRequest) (*net.EndTranscodingSessionResponse, error) {
@@ -336,18 +350,18 @@ func endTranscodingSession(node *core.LivepeerNode, orch Orchestrator, req *net.
 	return &net.EndTranscodingSessionResponse{}, nil
 }
 
-func getPriceInfo(orch Orchestrator, addr ethcommon.Address, manifestID core.ManifestID) (*net.PriceInfo, error) {
+func getPriceInfo(orch Orchestrator, addr ethcommon.Address) (*net.PriceInfo, error) {
 	if AuthWebhookURL != nil {
 		webhookRes := getFromDiscoveryAuthWebhookCache(addr.Hex())
 		if webhookRes != nil && webhookRes.PriceInfo != nil {
 			return webhookRes.PriceInfo, nil
 		}
 	}
-	return orch.PriceInfo(addr, manifestID)
+	return orch.PriceInfo(addr)
 }
 
-func orchestratorInfo(orch Orchestrator, addr ethcommon.Address, serviceURI string, manifestID core.ManifestID) (*net.OrchestratorInfo, error) {
-	priceInfo, err := getPriceInfo(orch, addr, manifestID)
+func orchestratorInfo(orch Orchestrator, addr ethcommon.Address, serviceURI string) (*net.OrchestratorInfo, error) {
+	priceInfo, err := getPriceInfo(orch, addr)
 	if err != nil {
 		return nil, err
 	}
@@ -389,7 +403,7 @@ func verifyOrchestratorReq(orch Orchestrator, addr ethcommon.Address, sig []byte
 		glog.Error("orchestrator req sig check failed")
 		return fmt.Errorf("orchestrator req sig check failed")
 	}
-	return orch.CheckCapacity("")
+	return orch.CheckCapacity("", "rpc.go:406")
 }
 
 type discoveryAuthWebhookRes struct {

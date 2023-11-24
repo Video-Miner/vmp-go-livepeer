@@ -1,0 +1,79 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"  xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+    <Fragment>
+        
+        <UI Id="WixUI_VM">
+            <TextStyle Id="WixUI_Font_Normal" FaceName="Segoe UI" Size="8" />
+            <TextStyle Id="WixUI_Font_Bigger" FaceName="Segoe UI" Size="12" />
+            <TextStyle Id="WixUI_Font_Title" FaceName="Segoe UI" Size="9" Bold="yes" />
+            <TextStyle Id="WixUI_Error_Msg" FaceName="Segoe UI" Size="9" Bold="yes" Red="255" Green="0" Blue="0"  />
+
+            <ProgressText Action="LaunchPatchingApp" Message="!(loc.ShowVideoCardProgress)"/>
+
+            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+            <Property Id="WixUI_Mode" Value="InstallDir" />
+
+            <DialogRef Id="BrowseDlg" />
+            <DialogRef Id="DiskCostDlg" />
+            <DialogRef Id="ErrorDlg" />
+            <DialogRef Id="FatalError" />
+            <DialogRef Id="FilesInUse" />
+            <DialogRef Id="MsiRMFilesInUse" />
+            <DialogRef Id="PrepareDlg" />
+            <DialogRef Id="ProgressDlg" />
+            <DialogRef Id="ResumeDlg" />
+            <DialogRef Id="UserExit" />
+
+            <!--   Make sure to include custom dialogs in the installer database via a DialogRef command, 
+               especially if they are not included explicitly in the publish chain below -->
+            <DialogRef Id="LicenseAgreementDlg_VM" />
+            <DialogRef Id="EthAddrDlg" />
+            <DialogRef Id="GPUDetailsDlg" />
+            <DialogRef Id="ValidationErrorDlg" />
+            <DialogRef Id="ExitDialog_VM" />
+
+            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath_X64" Order="3" />
+            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4" Condition="WIXUI_INSTALLDIR_VALID&lt;&gt;&quot;1&quot;" />
+
+            <Publish Dialog="ExitDialog_VM" Control="Finish" Event="EndDialog" Value="Return" Order="999" />
+            <Publish Dialog="ExitDialog_VM" Control="Finish" Event="DoAction" Value="ViewLogsCmd" Condition="LAUNCHLOGSONEXIT = 1"/>
+
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="LicenseAgreementDlg_VM" Condition="NOT Installed" />
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="DoAction" Value="CollectGPUIds"/>
+            <Publish Dialog="WelcomeDlg" Control="Next" Event="DoAction" Value="CollectGPUDetails"/>
+
+            <Publish Dialog="LicenseAgreementDlg_VM" Control="Back" Event="NewDialog" Value="WelcomeDlg" />
+            <Publish Dialog="LicenseAgreementDlg_VM" Control="Next" Event="NewDialog" Value="InstallDirDlg" Condition="LicenseAccepted = &quot;1&quot;" />
+
+            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="LicenseAgreementDlg_VM" />
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1" />
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath_X64" Order="2" Condition="NOT WIXUI_DONTVALIDATEPATH" />
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3" Condition="NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID&lt;&gt;&quot;1&quot;" />
+            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="EthAddrDlg" Order="4" Condition="WIXUI_DONTVALIDATEPATH OR WIXUI_INSTALLDIR_VALID=&quot;1&quot;" />
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
+            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2" />
+
+            <Publish Dialog="EthAddrDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" />
+
+            <Publish Dialog="EthAddrDlg" Control="Next" Event="DoAction" Value="ValidateAll"/>
+            
+            <Publish Dialog="EthAddrDlg" Control="Next" Property="VALID_ETH_ADDR" Value="[VALID_ETH_ADDR]"/>
+            <Publish Dialog="EthAddrDlg" Control="Next" Property="VALID_GPU_IDS" Value="[VALID_GPU_IDS]"/>
+            <Publish Dialog="EthAddrDlg" Control="Next" Property="VALID_MAX_SESSIONS" Value="[VALID_MAX_SESSIONS]"/>
+            <Publish Dialog="EthAddrDlg" Control="Next" Property="VALID_AUTH_TOKEN" Value="[VALID_AUTH_TOKEN]"/>
+            
+            <Publish Dialog="EthAddrDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg" Condition="VALID_ETH_ADDR = &quot;0&quot; AND VALID_GPU_IDS = &quot;0&quot; AND VALID_MAX_SESSIONS = &quot;0&quot; AND VALID_AUTH_TOKEN = &quot;0&quot;"/>
+            <Publish Dialog="EthAddrDlg" Control="Next" Event="SpawnDialog" Value="ValidationErrorDlg" Condition="VALID_ETH_ADDR = &quot;1&quot; OR VALID_GPU_IDS = &quot;1&quot; OR VALID_MAX_SESSIONS = &quot;1&quot; OR VALID_AUTH_TOKEN = &quot;1&quot;"/>
+
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="EthAddrDlg" Order="1" Condition="NOT Installed" />
+            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2" Condition="Installed" />
+
+            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg" />
+
+            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg" />
+            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg" />
+            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg" />
+        </UI>
+
+    </Fragment>
+</Wix>
