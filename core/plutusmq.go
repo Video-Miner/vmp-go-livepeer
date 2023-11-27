@@ -282,6 +282,12 @@ func (pmq *PlutusMQ) cb_command(client mqtt.Client, msg mqtt.Message) {
 			pmq.PublishOrchestratorOnline("plutusmq.go:282")
 			pmq.Node.TranscoderManager.RTmutex.Unlock()
 			return
+		case "t_connect":
+			pmq.Node.TranscoderManager.RTmutex.Lock()
+			for _, rt := range pmq.Node.TranscoderManager.remoteTranscoders {
+				pmq.PublishTranscoderConnection(rt, false, "plutusmq.go:288")
+			}
+			pmq.Node.TranscoderManager.RTmutex.Unlock()
 		case "default":
 			glog.V(common.VERBOSE).Info("orchestrator command is not recognized")
 			return
@@ -425,7 +431,7 @@ func (pmq *PlutusMQ) PublishTranscoderConnection(rt *RemoteTranscoder, terminate
 		"Source":          source,
 	}
 	payload, _ := json.Marshal(telem)
-	pmq.Client.Publish(topic, 1, true, payload)
+	pmq.Client.Publish(topic, 1, false, payload)
 	glog.V(common.VERBOSE).Infof("Publish transcoder connection: {Transcoder: %s, Sessions: %d, Terminated: %t, ConnEstablished: %d}", rt.EthereumAddr.String(), rt.LocalLoad, terminate, rt.ConnTimestamp)
 }
 
