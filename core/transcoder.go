@@ -38,11 +38,11 @@ import (
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/livepeer/go-livepeer/clog"
 	"github.com/livepeer/go-livepeer/common"
 	"github.com/livepeer/go-livepeer/monitor"
 	"github.com/livepeer/go-livepeer/net"
-	"github.com/livepeer/lpms/ffmpeg"
 )
 
 type Transcoder interface {

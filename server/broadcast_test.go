@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/golang/protobuf/proto"
 	"github.com/livepeer/go-livepeer/common"
@@ -22,8 +24,6 @@ import (
 	"github.com/livepeer/go-livepeer/verification"
 	"github.com/livepeer/go-tools/drivers"
 	"github.com/livepeer/livepeer-data/pkg/data"
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
 	"github.com/livepeer/m3u8"
 
 	"github.com/stretchr/testify/assert"

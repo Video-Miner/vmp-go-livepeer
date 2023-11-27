@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/livepeer/lpms/stream"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	"github.com/stretchr/testify/assert"
 )
 

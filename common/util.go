@@ -19,13 +19,13 @@ import (
 	"testing"
 	"time"
 
+	ffmpeg "github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/golang/glog"
 	"github.com/jaypipes/ghw"
 	"github.com/jaypipes/ghw/pkg/gpu"
 	"github.com/jaypipes/ghw/pkg/pci"
 	"github.com/livepeer/go-livepeer/net"
-	ffmpeg "github.com/livepeer/lpms/ffmpeg"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc/peer"
 )

@@ -7,9 +7,9 @@ import (
 	"os"
 	"testing"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/livepeer/go-livepeer/common"
 	"github.com/livepeer/go-livepeer/net"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

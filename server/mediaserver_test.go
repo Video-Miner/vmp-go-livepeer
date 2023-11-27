@@ -23,14 +23,14 @@ import (
 
 	gonet "net"
 
+	lpmscore "github.com/Video-Miner/vmp-lpms/core"
+	ffmpeg "github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/segmenter"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-livepeer/core"
 	"github.com/livepeer/go-livepeer/net"
 	"github.com/livepeer/go-tools/drivers"
-	lpmscore "github.com/livepeer/lpms/core"
-	ffmpeg "github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/segmenter"
-	"github.com/livepeer/lpms/stream"
 	"go.uber.org/goleak"
 )
 

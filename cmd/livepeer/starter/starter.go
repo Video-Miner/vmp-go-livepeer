@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -38,7 +39,6 @@ import (
 	"github.com/livepeer/go-livepeer/verification"
 	"github.com/livepeer/go-tools/drivers"
 	"github.com/livepeer/livepeer-data/pkg/event"
-	"github.com/livepeer/lpms/ffmpeg"
 )
 
 var (

@@ -10,10 +10,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-livepeer/common"
 	lpmon "github.com/livepeer/go-livepeer/monitor"
-	"github.com/livepeer/lpms/ffmpeg"
 	"gonum.org/v1/gonum/stat"
 )
 

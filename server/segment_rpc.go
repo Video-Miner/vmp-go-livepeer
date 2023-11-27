@@ -14,14 +14,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	"github.com/livepeer/go-livepeer/clog"
 	"github.com/livepeer/go-livepeer/common"
 	"github.com/livepeer/go-livepeer/core"
 	"github.com/livepeer/go-livepeer/eth"
 	"github.com/livepeer/go-livepeer/monitor"
 	"github.com/livepeer/go-livepeer/net"
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"

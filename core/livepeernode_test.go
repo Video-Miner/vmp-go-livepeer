@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-tools/drivers"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

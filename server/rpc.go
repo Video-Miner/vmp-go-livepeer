@@ -16,14 +16,14 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
+	ffmpeg "github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	"github.com/livepeer/go-livepeer/clog"
 	"github.com/livepeer/go-livepeer/common"
 	"github.com/livepeer/go-livepeer/core"
 	"github.com/livepeer/go-livepeer/net"
 	"github.com/livepeer/go-livepeer/pm"
 	"github.com/livepeer/go-tools/drivers"
-	ffmpeg "github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
 	"github.com/patrickmn/go-cache"
 
 	ethcommon "github.com/ethereum/go-ethereum/common"

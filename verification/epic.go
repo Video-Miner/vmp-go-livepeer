@@ -15,7 +15,7 @@ import (
 
 	"github.com/livepeer/go-livepeer/common"
 
-	"github.com/livepeer/lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 )
 
 // VerifierPath is the local path to the verifier shared volume.

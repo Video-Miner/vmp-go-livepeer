@@ -8,10 +8,10 @@ import (
 	"sync"
 	"time"
 
+	ffmpeg "github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-livepeer/common"
 	"github.com/livepeer/go-tools/drivers"
-	ffmpeg "github.com/livepeer/lpms/ffmpeg"
 	"github.com/livepeer/m3u8"
 )
 

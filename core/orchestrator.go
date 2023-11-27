@@ -32,10 +32,10 @@ import (
 	"github.com/livepeer/go-livepeer/pm"
 	"github.com/livepeer/go-tools/drivers"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 	lpcrypto "github.com/livepeer/go-livepeer/crypto"
 	lpmon "github.com/livepeer/go-livepeer/monitor"
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
 )
 
 const maxSegmentChannels = 4

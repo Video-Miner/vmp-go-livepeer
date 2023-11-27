@@ -6,9 +6,9 @@ import (
 	"math"
 	"sync"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/livepeer/go-livepeer/clog"
 	"github.com/livepeer/go-livepeer/common"
-	"github.com/livepeer/lpms/ffmpeg"
 )
 
 var ErrTranscoderBusy = errors.New("TranscoderBusy")

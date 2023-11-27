@@ -8,8 +8,8 @@ import (
 	"testing"
 	"time"
 
+	ffmpeg "github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/livepeer/go-tools/drivers"
-	ffmpeg "github.com/livepeer/lpms/ffmpeg"
 	"github.com/livepeer/m3u8"
 	"github.com/stretchr/testify/assert"
 )

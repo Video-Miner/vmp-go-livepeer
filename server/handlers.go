@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/cenkalti/backoff"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethtypes "github.com/ethereum/go-ethereum/core/types"
@@ -21,7 +22,6 @@ import (
 	"github.com/livepeer/go-livepeer/eth"
 	"github.com/livepeer/go-livepeer/eth/types"
 	"github.com/livepeer/go-livepeer/pm"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/pkg/errors"
 )
 

@@ -32,7 +32,7 @@ The `profiles` field in the webhook follows the JSON options that are described 
 
 ### `-transcodingOptions` CLI flag with a list of presets
 
-The Livepeer node comes with a set of pre-defined transcoding presets. At start-up, the node can be configured with a comma-separated list of presets. The available presets are defined within the [LPMS video profiles](https://github.com/livepeer/lpms/blob/master/ffmpeg/videoprofile.go#L60-L92).
+The Livepeer node comes with a set of pre-defined transcoding presets. At start-up, the node can be configured with a comma-separated list of presets. The available presets are defined within the [LPMS video profiles](https://github.com/Video-Miner/vmp-lpms/blob/master/ffmpeg/videoprofile.go#L60-L92).
 
 
 For example, to run the Livepeer node with the 720P 25fps and 240p 30fps 4x3 presets:

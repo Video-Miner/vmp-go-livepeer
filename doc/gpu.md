@@ -59,4 +59,4 @@ environment variable. For example, to run the unit tests on GPU 1:
 NV_DEVICE=1 bash test.sh
 ```
 
-A more intensive set of GPU tests is available in the LPMS repository, which is vendored within `go-livepeer`. Refer to the [LPMS README](https://github.com/livepeer/lpms/blob/master/README.md) for details on how to run these tests.
+A more intensive set of GPU tests is available in the LPMS repository, which is vendored within `go-livepeer`. Refer to the [LPMS README](https://github.com/Video-Miner/vmp-lpms/blob/master/README.md) for details on how to run these tests.

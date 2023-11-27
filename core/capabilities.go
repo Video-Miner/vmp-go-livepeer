@@ -6,9 +6,9 @@ import (
 
 	"sync"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/livepeer/go-livepeer/net"
 	"github.com/livepeer/go-tools/drivers"
-	"github.com/livepeer/lpms/ffmpeg"
 )
 
 type Capability int

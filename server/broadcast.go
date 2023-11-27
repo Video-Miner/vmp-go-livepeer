@@ -30,8 +30,8 @@ import (
 	"github.com/livepeer/livepeer-data/pkg/data"
 	"github.com/livepeer/livepeer-data/pkg/event"
 
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 )
 
 var refreshTimeout = 2500 * time.Millisecond

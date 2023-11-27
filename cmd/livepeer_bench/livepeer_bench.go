@@ -13,9 +13,9 @@ import (
 
 	//"runtime/pprof"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-livepeer/common"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/livepeer/m3u8"
 	"github.com/olekukonko/tablewriter"
 )

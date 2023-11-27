@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/jaypipes/ghw"
 	"github.com/jaypipes/ghw/pkg/gpu"
 	"github.com/jaypipes/ghw/pkg/pci"
 	"github.com/jaypipes/pcidb"
 	"github.com/livepeer/go-livepeer/net"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/stretchr/testify/assert"
 )
 

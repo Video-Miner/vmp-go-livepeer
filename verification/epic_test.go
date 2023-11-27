@@ -11,8 +11,8 @@ import (
 	"github.com/livepeer/go-livepeer/net"
 	"github.com/livepeer/go-tools/drivers"
 
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/stream"
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/stream"
 
 	"github.com/stretchr/testify/assert"
 )

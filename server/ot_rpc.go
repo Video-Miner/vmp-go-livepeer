@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/livepeer/lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 
 	"github.com/golang/glog"
 	"google.golang.org/grpc/peer"

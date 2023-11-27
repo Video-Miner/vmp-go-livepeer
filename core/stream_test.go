@@ -6,10 +6,10 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	ethcommon "github.com/ethereum/go-ethereum/common"
 	ethcrypto "github.com/ethereum/go-ethereum/crypto"
 	"github.com/livepeer/go-livepeer/common"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/stretchr/testify/assert"
 )
 

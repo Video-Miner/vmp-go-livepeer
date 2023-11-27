@@ -10,11 +10,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
 	"github.com/golang/glog"
 	"github.com/livepeer/go-livepeer/core"
 	lpmon "github.com/livepeer/go-livepeer/monitor"
 	"github.com/livepeer/go-tools/drivers"
-	"github.com/livepeer/lpms/ffmpeg"
 	"github.com/stretchr/testify/assert"
 )
 

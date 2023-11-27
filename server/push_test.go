@@ -25,6 +25,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/goleak"
 
+	"github.com/Video-Miner/vmp-lpms/ffmpeg"
+	"github.com/Video-Miner/vmp-lpms/vidplayer"
 	"github.com/golang/glog"
 	"github.com/golang/protobuf/proto"
 	"github.com/livepeer/go-livepeer/common"
@@ -32,8 +34,6 @@ import (
 	lpmon "github.com/livepeer/go-livepeer/monitor"
 	"github.com/livepeer/go-livepeer/net"
 	"github.com/livepeer/go-tools/drivers"
-	"github.com/livepeer/lpms/ffmpeg"
-	"github.com/livepeer/lpms/vidplayer"
 )
 
 func requestSetup(s *LivepeerServer) (http.Handler, *strings.Reader, *httptest.ResponseRecorder) {

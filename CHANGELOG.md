@@ -94,7 +94,7 @@ None
 #### Broadcaster
 - [#2709](https://github.com/livepeer/go-livepeer/pull/2709) Add logging for high keyframe interval, reduce log level for discovery loop (@eliteprox)
 - [#2684](https://github.com/livepeer/go-livepeer/pull/2684) Fix transcode success rate metric to better account for errors (@mjh1)
-- [#357](https://github.com/livepeer/lpms/pull/357) Tune fast verification signature comparison (@cyberj0g)
+- [#357](https://github.com/Video-Miner/vmp-lpms/pull/357) Tune fast verification signature comparison (@cyberj0g)
 
 #### Orchestrator
 - [#2707](https://github.com/livepeer/go-livepeer/pull/2707) Fix remote transcoders quietly getting dropped from selection (@stronk-dev)
