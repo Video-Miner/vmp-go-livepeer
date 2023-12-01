@@ -14,11 +14,17 @@ import (
 	"github.com/livepeer/go-livepeer/pm"
 )
 
+type MqttTopic struct {
+	Topic    string
+	Qos      byte
+	Callback mqtt.MessageHandler
+}
+
 type PlutusMQ struct {
 	Client   mqtt.Client
 	ClientID string
 
-	TopicStore []string
+	TopicStore []MqttTopic
 	TsMutex    sync.RWMutex
 
 	Node *LivepeerNode
@@ -39,8 +45,8 @@ var connectHandler mqtt.OnConnectHandler = func(client mqtt.Client) {
 
 	if len(LPNode.MqttBroker.TopicStore) > 0 {
 		for _, topic := range LPNode.MqttBroker.TopicStore {
-			glog.V(common.VERBOSE).Infof("Resubscribing to topic: %s", topic)
-			LPNode.MqttBroker.Subscribe(topic, 1, messagePubHandler)
+			glog.V(common.VERBOSE).Infof("Resubscribing to topic: %s, QOS: %d, Callback: %v", topic.Topic, topic.Qos, topic.Callback)
+			LPNode.MqttBroker.Subscribe(topic.Topic, topic.Qos, topic.Callback)
 		}
 	}
 
@@ -113,13 +119,13 @@ func NewMQTTClient(node *LivepeerNode, broker string, port int, username string,
 	return &pmq
 }
 
-func (pmq *PlutusMQ) AddTopicToStore(topic string) {
+func (pmq *PlutusMQ) AddTopicToStore(topic MqttTopic) {
 	pmq.TsMutex.Lock()
 	defer pmq.TsMutex.Unlock()
 
 	// Check if the topic is already in the TopicStore
 	for _, t := range pmq.TopicStore {
-		if t == topic {
+		if t.Topic == topic.Topic {
 			return // Topic already exists, so return without adding it again
 		}
 	}
@@ -131,7 +137,7 @@ func (pmq *PlutusMQ) RemoveTopicFromStore(topic string) {
 	pmq.TsMutex.Lock()
 	defer pmq.TsMutex.Unlock()
 	for i, t := range pmq.TopicStore {
-		if t == topic {
+		if t.Topic == topic {
 			pmq.TopicStore = append(pmq.TopicStore[:i], pmq.TopicStore[i+1:]...)
 			break
 		}
@@ -160,7 +166,7 @@ func (pmq *PlutusMQ) SubOrchestrator() {
 func (pmq *PlutusMQ) Subscribe(topic string, qos byte, callback mqtt.MessageHandler) {
 	token := pmq.Client.Subscribe(topic, qos, callback)
 	glog.V(common.VERBOSE).Infof("Subscribing to topic: %s", topic)
-	pmq.AddTopicToStore(topic)
+	pmq.AddTopicToStore(MqttTopic{Topic: topic, Qos: qos, Callback: callback})
 	go func() {
 		_ = token.Wait() // Can also use '<-t.Done()' in releases > 1.2.0
 		if token.Error() != nil {
